@@ -15,6 +15,7 @@ ENV BIND_HOST=0.0.0.0
 COPY --from=builder --chown=node:node /app/package.json /app/package-lock.json /app/tsconfig.json /app/next.config.mjs ./
 COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/.next ./.next
+COPY --from=builder --chown=node:node /app/public ./public
 COPY --from=builder --chown=node:node /app/server ./server
 COPY --from=builder --chown=node:node /app/src/lib ./src/lib
 USER node

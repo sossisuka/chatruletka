@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  Aperture,
   ArrowDown,
   ArrowRight,
   Check,
@@ -21,7 +20,6 @@ import {
   Settings2,
   ShieldCheck,
   ShieldOff,
-  Shuffle,
   SkipForward,
   Square,
   Users,
@@ -115,7 +113,7 @@ export function ChatApp() {
         <div className="header-inner">
           <a className="brand" href="#" aria-label="Chatruletka — главная">
             <span className="brand-icon">
-              <Aperture strokeWidth={2.2} />
+              <span className="revolver-icon" aria-hidden="true" />
             </span>
             <span>
               Chatruletka<span className="brand-dot">.</span>
@@ -221,11 +219,7 @@ export function ChatApp() {
                   <span className="orbit-spark spark-two" />
                   <span className="orbit-spark spark-three" />
                   <span className="hero-mark">
-                    {searching ? (
-                      <Shuffle size={45} strokeWidth={1.5} />
-                    ) : (
-                      <Aperture size={64} strokeWidth={1.5} />
-                    )}
+                    <span className="revolver-icon" aria-hidden="true" />
                   </span>
                 </div>
                 <h2 key={`heading-${chat.status}`} className="status-heading">
@@ -708,7 +702,7 @@ export function ChatApp() {
       </main>
       <footer className="site-footer">
         <a className="brand footer-brand" href="#">
-          <Aperture size={22} />
+          <span className="revolver-icon" aria-hidden="true" />
           <span>Chatruletka.</span>
         </a>
         <span className="footer-tagline">
