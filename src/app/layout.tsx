@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { PT_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -14,6 +14,14 @@ export const metadata: Metadata = {
     "Случайные знакомства, живые разговоры. Бесплатный видеочат с подбором собеседников в реальном времени.",
   robots: { index: false, follow: false },
 };
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f9fc" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0b0b" },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {

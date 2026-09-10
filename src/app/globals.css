@@ -6,6 +6,131 @@
   --line: #e6eaf0;
   --paper: #f7f9fc;
   --green: #3aad83;
+  --body-background: var(--paper);
+  --chrome-surface: #fff;
+  --panel-surface: #fff;
+  --panel-soft: #f5f7fb;
+  --panel-muted: #fafbfd;
+  --panel-focus: #f0f5fc;
+  --panel-info: #edf4fd;
+  --panel-warning: #fff9ec;
+  --online-surface: #edf7f1;
+  --offline-surface: #f4f5f7;
+  --dropdown-shadow: 0 12px 36px #2431471c;
+  --floating-shadow: 0 2px 9px #24314709;
+  --modal-shadow: 0 20px 100px #11234140;
+  --modal-backdrop: #12203899;
+  --field-text: #46566c;
+  --field-placeholder: #a6b0bc;
+  --message-surface: #f0f3f8;
+  --message-own-surface: #e9f0fd;
+  --empty-icon-surface: #f1f5fa;
+  --feature-icon-surface: #eaf0f9;
+  --feature-icon-hover-surface: #e0eaf9;
+  --video-surface: #1a2230;
+  --remote-panel-surface: radial-gradient(
+    ellipse at 49% 39%,
+    #283e5a 0,
+    #1b2b41 51%,
+    #172436 100%
+  );
+  --local-panel-surface: radial-gradient(
+    ellipse at 49% 50%,
+    #242c37 0,
+    #1c232e 90%
+  );
+  --video-fullscreen-surface: #142033;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #ededed;
+    --muted: #9a9a9a;
+    --line: rgb(255 255 255 / 7%);
+    --paper: #0b0b0b;
+    --body-background:
+      radial-gradient(circle at 50% 0%, rgb(253 185 49 / 3%), transparent 30rem),
+      var(--paper);
+    --chrome-surface: #0d0d0d;
+    --panel-surface: #111;
+    --panel-soft: #151515;
+    --panel-muted: #121212;
+    --panel-focus: #1b1b1b;
+    --panel-info: #151515;
+    --panel-warning: #19140b;
+    --online-surface: #132018;
+    --offline-surface: #171717;
+    --dropdown-shadow: 0 18px 54px rgb(0 0 0 / 38%);
+    --floating-shadow: 0 14px 34px rgb(0 0 0 / 28%);
+    --modal-shadow: 0 24px 90px rgb(0 0 0 / 58%);
+    --modal-backdrop: rgb(0 0 0 / 68%);
+    --field-text: #ededed;
+    --field-placeholder: #777;
+    --message-surface: #181818;
+    --message-own-surface: #172031;
+    --empty-icon-surface: rgb(255 255 255 / 5%);
+    --feature-icon-surface: #181818;
+    --feature-icon-hover-surface: #1f1f1f;
+    --video-surface: #111;
+    --remote-panel-surface:
+      radial-gradient(circle at 52% 30%, rgb(253 185 49 / 8%), transparent 36%),
+      linear-gradient(145deg, #181818, #0f0f0f 72%);
+    --local-panel-surface:
+      radial-gradient(circle at 48% 38%, rgb(255 255 255 / 4%), transparent 32%),
+      linear-gradient(145deg, #161616, #0e0e0e);
+    --video-fullscreen-surface: #0b0b0b;
+    color-scheme: dark;
+  }
+
+  nav a,
+  .intro p,
+  .intro-note,
+  .filter small,
+  .filter-hint,
+  .safety-note p,
+  .chat-private,
+  .empty-chat p,
+  .section-heading > p,
+  .feature-grid p,
+  .faq-section details,
+  .faq-section details p,
+  .site-footer,
+  .modal-copy,
+  .permission-list p,
+  .consent,
+  .settings-field small,
+  .setting-toggle small,
+  .settings-note,
+  .rules-list p,
+  .privacy-copy {
+    color: #9a9a9a;
+  }
+
+  .online-pill {
+    color: #7ac79f;
+  }
+
+  .online-pill.offline {
+    color: #9a9a9a;
+  }
+
+  .text-chat-header strong,
+  .empty-chat h3,
+  .feature-grid h3,
+  .settings-field,
+  .setting-toggle,
+  .rules-list,
+  .rules-list strong {
+    color: #d6d6d6;
+  }
+
+  .notice {
+    color: #9ab9df;
+  }
+
+  .connection-notice {
+    color: #d1b464;
+  }
 }
 * {
   box-sizing: border-box;
@@ -13,11 +138,12 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 90px;
+  background: var(--paper);
 }
 body {
   margin: 0;
   color: var(--ink);
-  background: var(--paper);
+  background: var(--body-background);
   font-family: var(--font-pt-sans), Arial, sans-serif;
   font-size: 15px;
   -webkit-font-smoothing: antialiased;
@@ -88,7 +214,7 @@ select {
 }
 .site-header {
   height: 79px;
-  background: #fff;
+  background: var(--chrome-surface);
 }
 .header-inner {
   height: 100%;
@@ -161,7 +287,7 @@ nav .nav-active:after {
   gap: 7px;
   align-items: center;
   margin-left: auto;
-  background: #edf7f1;
+  background: var(--online-surface);
   padding: 7px 12px;
   border-radius: 25px;
   color: #408264;
@@ -181,7 +307,7 @@ nav .nav-active:after {
   flex-shrink: 0;
 }
 .online-pill.offline {
-  background: #f4f5f7;
+  background: var(--offline-surface);
   color: #808897;
 }
 .offline .live-dot {
@@ -274,16 +400,11 @@ h1 > span {
   min-width: 0;
   overflow: hidden;
   border-radius: 13px;
-  background: #1a2230;
+  background: var(--video-surface);
   color: #d3d9e1;
 }
 .remote-panel {
-  background: radial-gradient(
-    ellipse at 49% 39%,
-    #283e5a 0,
-    #1b2b41 51%,
-    #172436 100%
-  );
+  background: var(--remote-panel-surface);
 }
 .video-feed {
   position: absolute;
@@ -501,7 +622,7 @@ h1 > span {
   color: #fff;
 }
 .local-panel {
-  background: radial-gradient(ellipse at 49% 50%, #242c37 0, #1c232e 90%);
+  background: var(--local-panel-surface);
 }
 .local-panel .video-tag {
   color: #a3afc0;
@@ -666,7 +787,7 @@ h1 > span {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: white;
+  background: var(--panel-surface);
   border-radius: 9px;
   padding: 10px 15px;
   min-width: 0;
@@ -772,8 +893,8 @@ h1 > span {
   padding: 6px;
   list-style: none;
   border-radius: 12px;
-  background: white;
-  box-shadow: 0 12px 36px #2431471c;
+  background: var(--panel-surface);
+  box-shadow: var(--dropdown-shadow);
 }
 .country-options li {
   display: flex;
@@ -793,21 +914,21 @@ h1 > span {
   flex: 1;
 }
 .country-options .is-highlighted {
-  background: #f0f5fc;
+  background: var(--panel-focus);
 }
 .country-options [aria-selected="true"] {
   color: var(--blue);
 }
 .settings-country {
   border-radius: 9px;
-  background: #f5f7fb;
+  background: var(--panel-soft);
 }
 .settings-country .country-options {
   position: relative;
   top: auto;
   width: 100%;
   box-shadow: none;
-  background: #f5f7fb;
+  background: var(--panel-soft);
 }
 .filter-hint {
   font-size: 10px;
@@ -857,7 +978,7 @@ h1 > span {
   flex-direction: column;
   border-radius: 10px;
   overflow: hidden;
-  background: white;
+  background: var(--panel-surface);
 }
 .text-chat-header {
   display: flex;
@@ -865,7 +986,7 @@ h1 > span {
   justify-content: space-between;
   gap: 10px;
   padding: 13px 17px;
-  border-bottom: 1px solid #f0f2f6;
+  border-bottom: 1px solid var(--line);
 }
 .text-chat-header > span {
   display: flex;
@@ -917,7 +1038,7 @@ h1 > span {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: #f1f5fa;
+  background: var(--empty-icon-surface);
   z-index: 0;
   left: -7px;
   top: -6px;
@@ -940,12 +1061,12 @@ h1 > span {
   display: flex;
   gap: 10px;
   margin: 0 12px 12px;
-  background: #fafbfd;
+  background: var(--panel-muted);
   padding: 7px 8px 7px 12px;
   border-radius: 7px;
 }
 .message-form:focus-within {
-  background: #f0f5fc;
+  background: var(--panel-focus);
 }
 .message-form input {
   width: 100%;
@@ -955,10 +1076,10 @@ h1 > span {
   border: 0;
   outline: none;
   font-size: 12px;
-  color: #46566c;
+  color: var(--field-text);
 }
 .message-form input::placeholder {
-  color: #a6b0bc;
+  color: var(--field-placeholder);
 }
 .message-form button {
   width: 32px;
@@ -987,13 +1108,13 @@ h1 > span {
 }
 .message-bubble {
   max-width: 85%;
-  background: #f0f3f8;
+  background: var(--message-surface);
   border-radius: 9px 9px 9px 2px;
   padding: 8px 11px;
   min-width: 60px;
 }
 .mine .message-bubble {
-  background: #e9f0fd;
+  background: var(--message-own-surface);
   border-radius: 9px 9px 2px 9px;
 }
 .message-bubble p {
@@ -1014,7 +1135,7 @@ h1 > span {
   display: flex;
   align-items: center;
   gap: 11px;
-  background: #edf4fd;
+  background: var(--panel-info);
   padding: 10px 14px;
   border-radius: 8px;
   margin-top: 16px;
@@ -1026,7 +1147,7 @@ h1 > span {
   flex: 1;
 }
 .how-section {
-  border-top: 1px solid #e6ebf2;
+  border-top: 1px solid var(--line);
   margin-top: 38px;
   padding: 31px 0 34px;
 }
@@ -1067,7 +1188,7 @@ h1 > span {
   place-items: center;
   width: 41px;
   height: 41px;
-  background: #eaf0f9;
+  background: var(--feature-icon-surface);
   color: #6d90be;
   border-radius: 10px;
   flex-shrink: 0;
@@ -1171,23 +1292,24 @@ h1 > span {
   bottom: 15px;
   width: 33px;
   height: 33px;
-  background: white;
+  background: var(--panel-surface);
   color: #91a1b5;
   border-radius: 50%;
-  box-shadow: 0 2px 9px #24314709;
+  box-shadow: var(--floating-shadow);
 }
 .modal {
   width: min(460px, calc(100vw - 32px));
   border: 0;
   border-radius: 18px;
   padding: 0;
-  box-shadow: 0 20px 100px #11234140;
+  background: var(--panel-surface);
+  box-shadow: var(--modal-shadow);
   color: var(--ink);
   max-height: 90dvh;
   overflow: auto;
 }
 .modal::backdrop {
-  background: #12203899;
+  background: var(--modal-backdrop);
   backdrop-filter: blur(5px);
 }
 .modal-inner {
@@ -1218,7 +1340,7 @@ h1 > span {
   width: 64px;
   height: 64px;
   border-radius: 18px;
-  background: #eef3fc;
+  background: var(--panel-info);
   display: grid;
   place-items: center;
   margin: 5px 0 20px;
@@ -1227,7 +1349,7 @@ h1 > span {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  background: #f6f8fb;
+  background: var(--panel-soft);
   padding: 18px;
   border-radius: 10px;
   margin: 19px 0;
@@ -1288,7 +1410,8 @@ h1 > span {
 }
 .settings-field select {
   border: 0;
-  background: #fbfcfe;
+  background: var(--panel-muted);
+  color: var(--ink);
   border-radius: 8px;
   padding: 10px;
 }
@@ -1381,7 +1504,7 @@ h1 > span {
   border-radius: 0;
   width: 100%;
   height: 100%;
-  background: #142033;
+  background: var(--video-fullscreen-surface);
 }
 .video-panel:fullscreen .remote-placeholder h2 {
   font-size: 30px;
@@ -1993,7 +2116,7 @@ h1 > span {
   padding: 16px 18px;
   margin-bottom: 18px;
   border-radius: 11px;
-  background: #fff9ec;
+  background: var(--panel-warning);
   color: #806638;
   animation: notice-in 280ms ease-out both;
 }
@@ -2095,7 +2218,7 @@ h1 > span {
   transition: background 180ms;
 }
 .filter:focus-within {
-  background: #f0f5fc;
+  background: var(--panel-focus);
 }
 .local-controls button,
 .video-tools button {
@@ -2143,7 +2266,7 @@ h1 > span {
   }
   .feature-grid article:hover .feature-icon {
     transform: translateY(-3px) rotate(-4deg);
-    background: #e0eaf9;
+    background: var(--feature-icon-hover-surface);
   }
 }
 @keyframes rise-in {
