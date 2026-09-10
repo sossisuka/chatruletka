@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Play } from "lucide-react";
 
 export function VideoPane({
@@ -17,18 +17,31 @@ export function VideoPane({
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [blockedStream, setBlockedStream] = useState<MediaStream | null>(null);
+
+  const playCurrentStream = useCallback(() => {
+    const video = ref.current;
+    if (!video || !stream) return;
+    void video.play().catch(() => {
+      if (video.srcObject === stream) setBlockedStream(stream);
+    });
+  }, [stream]);
+
   useEffect(() => {
     const video = ref.current;
     if (!video) return;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
     video.srcObject = stream;
-    if (stream)
-      void video.play().catch(() => {
-        if (video.srcObject === stream) setBlockedStream(stream);
-      });
+    setBlockedStream(null);
+    if (stream) playCurrentStream();
     return () => {
+      video.pause();
       video.srcObject = null;
     };
-  }, [stream]);
+  }, [playCurrentStream, stream]);
+
   return (
     <>
       <video
@@ -38,6 +51,8 @@ export function VideoPane({
         autoPlay
         playsInline
         muted={muted}
+        onLoadedMetadata={playCurrentStream}
+        onCanPlay={playCurrentStream}
         onPlay={() => setBlockedStream(null)}
         className={`video-feed ${mirror ? "mirrored" : ""} ${className}`}
       />
