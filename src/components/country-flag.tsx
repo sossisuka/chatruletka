@@ -1,0 +1,19 @@
+import Image from "next/image";
+import { Globe2 } from "lucide-react";
+
+export function CountryFlag({ code }: { code: string }) {
+  if (code === "all" || code === "OTHER")
+    return <Globe2 className="country-flag country-globe" aria-hidden="true" />;
+
+  return (
+    <Image
+      className="country-flag"
+      src={`https://flagcdn.com/${code.toLowerCase()}.svg`}
+      width={22}
+      height={16}
+      alt=""
+      aria-hidden="true"
+      unoptimized
+    />
+  );
+}

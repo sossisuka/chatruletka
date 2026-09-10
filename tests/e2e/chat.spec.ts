@@ -164,9 +164,8 @@ test("country filter waits for a compatible visitor", async ({
   page,
 }) => {
   await page.goto("/");
-  await page
-    .getByRole("combobox", { name: "Страна собеседника" })
-    .selectOption("DE");
+  await page.getByRole("combobox", { name: "Страна собеседника" }).click();
+  await page.getByRole("option", { name: "Германия", exact: true }).click();
   await page.getByRole("button", { name: "Старт Начать знакомство" }).click();
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Включить камеру и начать" }).click();
@@ -183,7 +182,8 @@ test("country filter waits for a compatible visitor", async ({
   ).toBeVisible();
   await b.getByRole("button", { name: "Стоп Завершить чат" }).click();
   await b.getByRole("button", { name: "Настройки", exact: true }).click();
-  await b.getByLabel("Ваша страна", { exact: false }).selectOption("DE");
+  await b.getByRole("combobox", { name: "Ваша страна", exact: true }).click();
+  await b.getByRole("option", { name: "Германия", exact: true }).click();
   await b.getByRole("button", { name: "Готово" }).click();
   await b.getByRole("button", { name: "Старт Начать знакомство" }).click();
   await Promise.all([connected(page), connected(b)]);
@@ -274,7 +274,8 @@ test("mobile layout, settings, consent and rules work without overflow", async (
   await expect(
     page.getByRole("dialog", { name: "Ваши настройки" }),
   ).toBeVisible();
-  await page.getByLabel("Ваша страна", { exact: false }).selectOption("KZ");
+  await page.getByRole("combobox", { name: "Ваша страна", exact: true }).click();
+  await page.getByRole("option", { name: "Казахстан", exact: true }).click();
   await page.getByRole("button", { name: "Готово" }).click();
   await expect(
     page.getByText("Ваша страна: Казахстан.", { exact: false }),
@@ -290,6 +291,38 @@ test("mobile layout, settings, consent and rules work without overflow", async (
   await expect(
     page.getByRole("button", { name: "Включить камеру и начать" }),
   ).toBeEnabled();
+});
+
+test("country menus support keyboard selection, dismissal and focus inside settings", async ({ page }) => {
+  await page.goto("/");
+  const country = page.getByRole("combobox", { name: "Страна собеседника" });
+  await country.focus();
+  await page.keyboard.press("ArrowDown");
+  await expect(page.getByRole("listbox")).toBeVisible();
+  await page.keyboard.press("Home");
+  for (let step = 0; step < 5; step++) await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("Enter");
+  await expect(country).toContainText("Германия");
+  await expect(country).toBeFocused();
+  await country.click();
+  await page.getByRole("heading", { name: "Мир ближе, чем кажется." }).click();
+  await expect(page.getByRole("listbox")).not.toBeVisible();
+
+  await page.getByRole("button", { name: "Настройки", exact: true }).click();
+  const ownCountry = page.getByRole("combobox", { name: "Ваша страна", exact: true });
+  await ownCountry.click();
+  await page.keyboard.press("End");
+  await page.keyboard.press("Enter");
+  await expect(ownCountry).toContainText("Другая страна");
+  await expect(ownCountry).toBeFocused();
+  await ownCountry.click();
+  await page.keyboard.press("Home");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("listbox")).not.toBeVisible();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(ownCountry).toContainText("Другая страна");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
 });
 
 test("external HTTP connects to the chat server and explains why camera requires HTTPS", async ({

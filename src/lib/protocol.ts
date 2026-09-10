@@ -1,13 +1,13 @@
 export const countries = [
-  { code: "RU", name: "Россия", flag: "🇷🇺" },
-  { code: "BY", name: "Беларусь", flag: "🇧🇾" },
-  { code: "KZ", name: "Казахстан", flag: "🇰🇿" },
-  { code: "UA", name: "Украина", flag: "🇺🇦" },
-  { code: "DE", name: "Германия", flag: "🇩🇪" },
-  { code: "US", name: "США", flag: "🇺🇸" },
-  { code: "GB", name: "Великобритания", flag: "🇬🇧" },
-  { code: "TR", name: "Турция", flag: "🇹🇷" },
-  { code: "OTHER", name: "Другая страна", flag: "🌍" },
+  { code: "RU", name: "Россия" },
+  { code: "BY", name: "Беларусь" },
+  { code: "KZ", name: "Казахстан" },
+  { code: "UA", name: "Украина" },
+  { code: "DE", name: "Германия" },
+  { code: "US", name: "США" },
+  { code: "GB", name: "Великобритания" },
+  { code: "TR", name: "Турция" },
+  { code: "OTHER", name: "Другая страна" },
 ] as const;
 
 export type Gender = "male" | "female" | "other";

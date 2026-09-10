@@ -24,6 +24,11 @@ const nextConfig = {
   turbopack: { root: process.cwd() },
   poweredByHeader: false,
   reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "flagcdn.com", pathname: "/*.svg", search: "" },
+    ],
+  },
   async headers() {
     return [
       {

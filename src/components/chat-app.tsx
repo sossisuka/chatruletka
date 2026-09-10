@@ -33,6 +33,8 @@ import { useVideoChat } from "@/hooks/use-video-chat";
 import { countries, type Gender } from "@/lib/protocol";
 import { VideoPane } from "./video-pane";
 import { Modal } from "./modal";
+import { CountryFlag } from "./country-flag";
+import { CountrySelect } from "./country-select";
 
 type Dialog = "rules" | "privacy" | "settings" | "start" | "block" | null;
 const statusLabels = {
@@ -256,7 +258,7 @@ export function ChatApp() {
               <span className="video-location">
                 {peerCountry ? (
                   <>
-                    {peerCountry.flag} {peerCountry.name}
+                    <CountryFlag code={peerCountry.code} /> {peerCountry.name}
                   </>
                 ) : (
                   <>
@@ -426,31 +428,17 @@ export function ChatApp() {
               </button>
             </div>
             <div className="filter-row">
-              <label className="filter">
-                <Globe2 size={19} />
-                <span>
-                  <small>Собеседники из</small>
-                  <select
-                    aria-label="Страна собеседника"
-                    value={chat.profile.lookingForCountry}
-                    disabled={active}
-                    onChange={(e) =>
-                      chat.updateProfile({
-                        ...chat.profile,
-                        lookingForCountry: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="all">Всего мира</option>
-                    {countries.map((c) => (
-                      <option value={c.code} key={c.code}>
-                        {c.flag} {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </span>
-                <ChevronDown size={15} />
-              </label>
+              <CountrySelect
+                className="filter country-filter"
+                label="Страна собеседника"
+                caption="Собеседники из"
+                includeAll
+                value={chat.profile.lookingForCountry}
+                disabled={active}
+                onChange={(country) =>
+                  chat.updateProfile({ ...chat.profile, lookingForCountry: country })
+                }
+              />
               <label className="filter">
                 <Users size={19} />
                 <span>
@@ -761,25 +749,21 @@ export function ChatApp() {
           <p className="modal-copy">
             Немного о вас — для подходящих знакомств.
           </p>
-          <label className="settings-field">
-            Ваша страна
-            <select
+          <div className="settings-field">
+            <span>Ваша страна</span>
+            <CountrySelect
+              className="settings-country"
+              label="Ваша страна"
               disabled={active}
               value={chat.profile.country}
-              onChange={(e) =>
-                chat.updateProfile({ ...chat.profile, country: e.target.value })
+              onChange={(country) =>
+                chat.updateProfile({ ...chat.profile, country })
               }
-            >
-              {countries.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.flag} {c.name}
-                </option>
-              ))}
-            </select>
+            />
             <small>
               Вы выбираете страну сами. Геолокация не запрашивается.
             </small>
-          </label>
+          </div>
           <label className="setting-toggle">
             <span>
               Отразить своё видео<small>Отражение видите только вы</small>
