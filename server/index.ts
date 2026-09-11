@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import next from "next";
 import nextEnv from "@next/env";
 import { createRealtime } from "./realtime";
+import { createCountryLookup } from "./geolocation";
 
 const dev =
   !process.argv.includes("--production") &&
@@ -38,7 +39,11 @@ const realtime = createRealtime(httpServer, {
     .filter(Boolean),
   turnSecret: process.env.TURN_SECRET,
   maxConnectionsPerIp: Number(process.env.MAX_CONNECTIONS_PER_IP || 30),
+  trustProxy: process.env.TRUST_PROXY === "true",
+  lookupCountry: createCountryLookup({ token: process.env.TWOIP_API_TOKEN }),
 });
+if (!process.env.TWOIP_API_TOKEN?.trim())
+  console.warn("2ip: TWOIP_API_TOKEN is not set; visitor countries will be unknown.");
 httpServer.listen(port, hostname, () =>
   console.log(
     `Chatruletka: http://localhost:${port} (${dev ? "development" : "production"})`,

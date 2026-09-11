@@ -1,8 +1,9 @@
 import Image from "next/image";
 import { Globe2 } from "lucide-react";
+import { isCountryCode } from "@/lib/protocol";
 
 export function CountryFlag({ code }: { code: string }) {
-  if (code === "all" || code === "OTHER")
+  if (!isCountryCode(code))
     return <Globe2 className="country-flag country-globe" aria-hidden="true" />;
 
   return (

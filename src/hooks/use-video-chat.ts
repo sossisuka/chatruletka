@@ -152,6 +152,8 @@ export function useVideoChat() {
 
     socket.on("ready", (config) => {
       configRef.current = config;
+      profileRef.current = { ...profileRef.current, country: config.country };
+      setProfile(profileRef.current);
       setServerConnected(true);
       setNotice("");
       if (activeRef.current && streamRef.current) search(socket);
@@ -418,8 +420,8 @@ export function useVideoChat() {
 
   function updateProfile(next: Profile) {
     if (activeRef.current) return;
-    profileRef.current = next;
-    setProfile(next);
+    profileRef.current = { ...next, country: profileRef.current.country };
+    setProfile(profileRef.current);
   }
   function toggleMic() {
     const track = streamRef.current?.getAudioTracks()[0];

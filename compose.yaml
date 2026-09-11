@@ -10,6 +10,8 @@ services:
       TURN_URLS: ${TURN_URLS:-}
       TURN_SECRET: ${TURN_SECRET:-}
       MAX_CONNECTIONS_PER_IP: ${MAX_CONNECTIONS_PER_IP:-30}
+      TWOIP_API_TOKEN: ${TWOIP_API_TOKEN:-}
+      TRUST_PROXY: ${TRUST_PROXY:-true}
     healthcheck:
       test:
         [

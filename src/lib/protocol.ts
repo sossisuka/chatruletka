@@ -10,6 +10,22 @@ export const countries = [
   { code: "OTHER", name: "Другая страна" },
 ] as const;
 
+const regionNames = new Intl.DisplayNames(["ru"], { type: "region", fallback: "none" });
+export function isCountryCode(code: string): boolean {
+  return /^[A-Z]{2}$/.test(code) && !["ZZ", "EU", "UN"].includes(code) &&
+    !!regionNames.of(code);
+}
+export function countryName(code: string): string {
+  return countries.find((country) => country.code === code)?.name ??
+    (isCountryCode(code) ? regionNames.of(code)! : "Не определена");
+}
+export function matchesCountryFilter(filter: string, country: string): boolean {
+  if (filter === "all") return true;
+  if (filter === "OTHER")
+    return isCountryCode(country) && !countries.some((entry) => entry.code === country);
+  return filter === country;
+}
+
 export type Gender = "male" | "female" | "other";
 export type Profile = {
   country: string;
@@ -17,7 +33,7 @@ export type Profile = {
   gender: Gender;
 };
 export const defaultProfile: Profile = {
-  country: "RU",
+  country: "UNKNOWN",
   lookingForCountry: "all",
   gender: "other",
 };
@@ -48,6 +64,7 @@ export type ServerEvents = {
   ready: (data: {
     iceServers: RTCIceServer[];
     relayConfigured: boolean;
+    country: string;
   }) => void;
   stats: (stats: Stats) => void;
   waiting: () => void;

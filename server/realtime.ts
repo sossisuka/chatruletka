@@ -2,8 +2,11 @@ import { createHmac, randomUUID } from "node:crypto";
 import type { Server as HttpServer } from "node:http";
 import { Server, type Socket } from "socket.io";
 import { isAllowedOrigin } from "./origin";
+import { getClientIp } from "./client-ip";
 import {
   countries,
+  isCountryCode,
+  matchesCountryFilter,
   type ClientEvents,
   type ServerEvents,
   type Profile,
@@ -14,6 +17,7 @@ import {
 type Peer = {
   socket: Socket<ClientEvents, ServerEvents>;
   profile: Profile | null;
+  country: string | null;
   partner: string | null;
   sessionId: string | null;
   previous: string | null;
@@ -26,6 +30,8 @@ type Options = {
   turnUrls?: string[];
   turnSecret?: string;
   maxConnectionsPerIp?: number;
+  trustProxy?: boolean;
+  lookupCountry?: (ip: string) => Promise<string | null>;
 };
 const countryCodes = new Set<string>(countries.map((c) => c.code));
 
@@ -33,7 +39,7 @@ function isProfile(value: unknown): value is Profile {
   if (!value || typeof value !== "object") return false;
   const p = value as Profile;
   return (
-    countryCodes.has(p.country) &&
+    typeof p.country === "string" &&
     (p.lookingForCountry === "all" || countryCodes.has(p.lookingForCountry)) &&
     ["male", "female", "other"].includes(p.gender)
   );
@@ -104,10 +110,8 @@ export function createRealtime(httpServer: HttpServer, options: Options = {}) {
       b.previous !== a.socket.id &&
       !a.blocked.has(b.socket.id) &&
       !b.blocked.has(a.socket.id) &&
-      (a.profile.lookingForCountry === "all" ||
-        a.profile.lookingForCountry === b.profile.country) &&
-      (b.profile.lookingForCountry === "all" ||
-        b.profile.lookingForCountry === a.profile.country)
+      matchesCountryFilter(a.profile.lookingForCountry, b.profile.country) &&
+      matchesCountryFilter(b.profile.lookingForCountry, a.profile.country)
     );
   }
   function drain() {
@@ -159,7 +163,7 @@ export function createRealtime(httpServer: HttpServer, options: Options = {}) {
   }
 
   io.use((socket, next) => {
-    const address = socket.handshake.address;
+    const address = getClientIp(socket.request, options.trustProxy) ?? "unknown";
     if ((ipCounts.get(address) ?? 0) >= (options.maxConnectionsPerIp ?? 30))
       return next(
         new Error("Слишком много подключений из одной сети. Попробуйте позже."),
@@ -168,11 +172,12 @@ export function createRealtime(httpServer: HttpServer, options: Options = {}) {
   });
 
   io.on("connection", (socket) => {
-    const address = socket.handshake.address;
+    const address = getClientIp(socket.request, options.trustProxy) ?? "unknown";
     ipCounts.set(address, (ipCounts.get(address) ?? 0) + 1);
     const p: Peer = {
       socket,
       profile: null,
+      country: null,
       partner: null,
       sessionId: null,
       previous: null,
@@ -196,18 +201,26 @@ export function createRealtime(httpServer: HttpServer, options: Options = {}) {
           .digest("base64"),
       });
     }
-    socket.emit("ready", {
-      iceServers,
-      relayConfigured: iceServers.some((s) =>
-        (Array.isArray(s.urls) ? s.urls : [s.urls]).some((url) =>
-          /^turns?:/.test(url),
-        ),
-      ),
-    });
+    void Promise.resolve().then(() => options.lookupCountry?.(address) ?? null)
+      .catch(() => null).then((country) => {
+        if (!socket.connected) return;
+        p.country = country && isCountryCode(country) ? country : "UNKNOWN";
+        socket.emit("ready", {
+          country: p.country,
+          iceServers,
+          relayConfigured: iceServers.some((s) =>
+            (Array.isArray(s.urls) ? s.urls : [s.urls]).some((url) =>
+              /^turns?:/.test(url),
+            ),
+          ),
+        });
+      });
     publishStats();
 
     socket.on("search", (profile, ack) => {
       if (typeof ack !== "function") return;
+      if (p.country === null)
+        return ack({ ok: false, error: "Определяем страну. Попробуйте через несколько секунд." });
       if (!isProfile(profile))
         return ack({
           ok: false,
@@ -221,7 +234,7 @@ export function createRealtime(httpServer: HttpServer, options: Options = {}) {
       if (p.partner)
         return ack({ ok: false, error: "Сначала завершите текущий разговор." });
       p.profile = {
-        country: profile.country,
+        country: p.country,
         gender: profile.gender,
         lookingForCountry: profile.lookingForCountry,
       };

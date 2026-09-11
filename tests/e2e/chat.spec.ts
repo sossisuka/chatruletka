@@ -180,12 +180,10 @@ test("country filter waits for a compatible visitor", async ({
   await expect(
     b.getByRole("heading", { name: "Ищем собеседника…" }),
   ).toBeVisible();
-  await b.getByRole("button", { name: "Стоп Завершить чат" }).click();
-  await b.getByRole("button", { name: "Настройки", exact: true }).click();
-  await b.getByRole("combobox", { name: "Ваша страна", exact: true }).click();
-  await b.getByRole("option", { name: "Германия", exact: true }).click();
-  await b.getByRole("button", { name: "Готово" }).click();
-  await b.getByRole("button", { name: "Старт Начать знакомство" }).click();
+  await page.getByRole("button", { name: "Стоп Завершить чат" }).click();
+  await page.getByRole("combobox", { name: "Страна собеседника" }).click();
+  await page.getByRole("option", { name: "Всего мира", exact: true }).click();
+  await page.getByRole("button", { name: "Старт Начать знакомство" }).click();
   await Promise.all([connected(page), connected(b)]);
   await context.close();
 });
@@ -274,11 +272,12 @@ test("mobile layout, settings, consent and rules work without overflow", async (
   await expect(
     page.getByRole("dialog", { name: "Ваши настройки" }),
   ).toBeVisible();
-  await page.getByRole("combobox", { name: "Ваша страна", exact: true }).click();
-  await page.getByRole("option", { name: "Казахстан", exact: true }).click();
+  await expect(page.getByRole("combobox", { name: "Ваша страна", exact: true })).toHaveCount(0);
+  await expect(page.locator(".detected-country")).toContainText("Не определена");
+  await expect(page.getByRole("dialog")).toContainText("Поиск по всему миру доступен");
   await page.getByRole("button", { name: "Готово" }).click();
   await expect(
-    page.getByText("Ваша страна: Казахстан.", { exact: false }),
+    page.getByText("Ваша страна: Не определена.", { exact: false }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Правила сообщества" }).click();
   await expect(page.getByRole("dialog")).toContainText("Только для взрослых");
@@ -293,7 +292,7 @@ test("mobile layout, settings, consent and rules work without overflow", async (
   ).toBeEnabled();
 });
 
-test("country menus support keyboard selection, dismissal and focus inside settings", async ({ page }) => {
+test("country filter supports keyboard selection and own country is read-only", async ({ page }) => {
   await page.goto("/");
   const country = page.getByRole("combobox", { name: "Страна собеседника" });
   await country.focus();
@@ -309,18 +308,9 @@ test("country menus support keyboard selection, dismissal and focus inside setti
   await expect(page.getByRole("listbox")).not.toBeVisible();
 
   await page.getByRole("button", { name: "Настройки", exact: true }).click();
-  const ownCountry = page.getByRole("combobox", { name: "Ваша страна", exact: true });
-  await ownCountry.click();
-  await page.keyboard.press("End");
-  await page.keyboard.press("Enter");
-  await expect(ownCountry).toContainText("Другая страна");
-  await expect(ownCountry).toBeFocused();
-  await ownCountry.click();
-  await page.keyboard.press("Home");
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("listbox")).not.toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Ваша страна", exact: true })).toHaveCount(0);
+  await expect(page.locator(".detected-country")).toContainText("Не определена");
   await expect(page.getByRole("dialog")).toBeVisible();
-  await expect(ownCountry).toContainText("Другая страна");
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
 });

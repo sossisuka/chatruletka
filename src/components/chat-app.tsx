@@ -30,7 +30,7 @@ import {
   X,
 } from "lucide-react";
 import { useVideoChat } from "@/hooks/use-video-chat";
-import { countries, type Gender } from "@/lib/protocol";
+import { countryName, type Gender } from "@/lib/protocol";
 import { VideoPane } from "./video-pane";
 import { Modal } from "./modal";
 import { CountryFlag } from "./country-flag";
@@ -59,9 +59,7 @@ export function ChatApp() {
   const active = chat.status !== "idle";
   const paired = chat.status === "connecting" || chat.status === "connected";
   const searching = chat.status === "searching" || chat.status === "connecting";
-  const peerCountry = countries.find(
-    (c) => c.code === chat.match?.peer.country,
-  );
+  const peerCountry = chat.match?.peer.country;
   const time = `${String(Math.floor(chat.elapsed / 60)).padStart(2, "0")}:${String(chat.elapsed % 60).padStart(2, "0")}`;
   const sessionId = chat.match?.sessionId || "";
   const draft = draftState.sessionId === sessionId ? draftState.text : "";
@@ -258,7 +256,7 @@ export function ChatApp() {
               <span className="video-location">
                 {peerCountry ? (
                   <>
-                    <CountryFlag code={peerCountry.code} /> {peerCountry.name}
+                    <CountryFlag code={peerCountry} /> {countryName(peerCountry)}
                   </>
                 ) : (
                   <>
@@ -468,10 +466,10 @@ export function ChatApp() {
               ) : (
                 <>
                   Ваша страна:{" "}
-                  {countries.find((c) => c.code === chat.profile.country)?.name}
+                  {chat.serverConnected ? countryName(chat.profile.country) : "Определяем…"}
                   .{" "}
                   <button onClick={() => setDialog("settings")}>
-                    Изменить
+                    Подробнее
                   </button>
                 </>
               )}
@@ -751,17 +749,15 @@ export function ChatApp() {
           </p>
           <div className="settings-field">
             <span>Ваша страна</span>
-            <CountrySelect
-              className="settings-country"
-              label="Ваша страна"
-              disabled={active}
-              value={chat.profile.country}
-              onChange={(country) =>
-                chat.updateProfile({ ...chat.profile, country })
-              }
-            />
+            <div className="detected-country">
+              <CountryFlag code={chat.profile.country} />
+              <strong>{chat.serverConnected ? countryName(chat.profile.country) : "Определяем…"}</strong>
+            </div>
             <small>
-              Вы выбираете страну сами. Геолокация не запрашивается.
+              {chat.profile.country === "UNKNOWN"
+                ? "Пока не удалось определить страну. Поиск по всему миру доступен."
+                : "Страна определена автоматически по вашему IP через 2ip."}
+              {" "}При использовании VPN может отображаться страна VPN-сервера.
             </small>
           </div>
           <label className="setting-toggle">
@@ -782,11 +778,6 @@ export function ChatApp() {
               onChange={(e) => setRemoteMuted(!e.target.checked)}
             />
           </label>
-          {active && (
-            <p className="settings-note">
-              Чтобы изменить страну, сначала нажмите «Стоп».
-            </p>
-          )}
           <button className="modal-primary" onClick={() => setDialog(null)}>
             Готово <Check size={18} />
           </button>
@@ -840,8 +831,14 @@ export function ChatApp() {
             <p>
               Приложение не записывает разговоры. Текст проходит через сервер
               без сохранения в базу данных. В памяти сервера временно находятся
-              выбранная страна, пол, состояние очереди и идентификатор
+              определённая страна, пол, состояние очереди и идентификатор
               соединения.
+            </p>
+            <p>
+              Для определения страны ваш IP-адрес передаётся сервису 2ip.
+              Результат хранится в памяти сервера до часа. Геолокация устройства
+              не запрашивается. Определение страны по IP не подтверждает личность
+              человека и может показывать местоположение VPN-сервера.
             </p>
             <p>
               Блокировка действует в пределах текущих подключений. При

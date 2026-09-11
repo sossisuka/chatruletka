@@ -5,6 +5,7 @@ import { createServer } from "node:http";
 import { io, type Socket } from "socket.io-client";
 import { createRealtime } from "../server/realtime";
 import { isAllowedOrigin } from "../server/origin";
+import { createCountryLookup } from "../server/geolocation";
 import {
   defaultProfile,
   type Ack,
@@ -21,6 +22,7 @@ let server: ReturnType<typeof createServer>;
 let realtime: ReturnType<typeof createRealtime>;
 let url: string;
 let sockets: Socket<ServerEvents, ClientEvents>[];
+let detectedCountries: Map<string, string>;
 
 async function until(predicate: () => boolean, timeout = 3000) {
   const end = Date.now() + timeout;
@@ -32,12 +34,23 @@ async function until(predicate: () => boolean, timeout = 3000) {
 
 beforeEach(async () => {
   sockets = [];
+  detectedCountries = new Map();
   server = createServer();
   realtime = createRealtime(server, {
     allowedOrigins: [origin],
     iceServers: [],
     turnUrls: ["turn:relay.example.com:3478"],
     turnSecret: "test-only-secret",
+    trustProxy: true,
+    maxConnectionsPerIp: 3,
+    lookupCountry: createCountryLookup({
+      token: "test-only-2ip-token",
+      minIntervalMs: 0,
+      fetcher: async (input) => {
+        const ip = decodeURIComponent(new URL(String(input)).pathname.slice(1));
+        return Response.json({ ip, code: detectedCountries.get(ip) ?? "ZZ" });
+      },
+    }),
   });
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
   const address = server.address();
@@ -70,6 +83,7 @@ async function visitor(
     ready: null as {
       iceServers: RTCIceServer[];
       relayConfigured: boolean;
+      country: string;
     } | null,
   };
   socket.on("matched", (data) => events.matches.push(data));
@@ -107,9 +121,11 @@ test("the first visitor waits; a real second visitor creates one isolated pair",
 });
 
 test("country preferences are enforced in both directions", async () => {
-  const a = await visitor();
-  const b = await visitor();
-  const c = await visitor();
+  detectedCountries.set("8.8.8.8", "RU");
+  detectedCountries.set("1.1.1.1", "DE");
+  const a = await visitor({ Origin: origin, "X-Forwarded-For": "8.8.8.8" });
+  const b = await visitor({ Origin: origin, "X-Forwarded-For": "1.1.1.1" });
+  const c = await visitor({ Origin: origin, "X-Forwarded-For": "1.1.1.1" });
   await a.search({ ...defaultProfile, country: "RU", lookingForCountry: "DE" });
   await b.search({ ...defaultProfile, country: "DE", lookingForCountry: "US" });
   assert.equal(realtime.stats().conversations, 0);
@@ -120,6 +136,59 @@ test("country preferences are enforced in both directions", async () => {
   assert.equal(a.events.matches[0].sessionId, c.events.matches[0].sessionId);
   assert.equal(b.events.matches.length, 0);
   assert.equal(realtime.stats().searching, 1);
+  assert.equal(a.events.ready!.country, "RU");
+  assert.equal(JSON.stringify(a.events.ready).includes("test-only-2ip-token"), false);
+  assert.equal(JSON.stringify(a.events.ready).includes("8.8.8.8"), false);
+  assert.equal(a.events.matches[0].peer.country, "DE");
+});
+
+test("client country spoofing cannot affect matching or the country shown to peers", async () => {
+  detectedCountries.set("8.8.8.8", "FR");
+  const a = await visitor({ Origin: origin, "X-Forwarded-For": "9.9.9.9, 8.8.8.8" });
+  const b = await visitor();
+  await a.search({ ...defaultProfile, country: "DE" });
+  await b.search({ ...defaultProfile, lookingForCountry: "DE" });
+  assert.equal(realtime.stats().conversations, 0);
+  await b.search({ ...defaultProfile, lookingForCountry: "OTHER" });
+  await until(() => a.events.matches.length === 1 && b.events.matches.length === 1);
+  assert.equal(a.events.ready!.country, "FR");
+  assert.equal(b.events.matches[0].peer.country, "FR");
+  assert.equal(a.events.matches[0].peer.country, "UNKNOWN");
+});
+
+test("unavailable geolocation never falls back to a self-declared country", async () => {
+  const a = await visitor({ Origin: origin, "X-Forwarded-For": "8.8.8.8" });
+  const b = await visitor();
+  await a.search({ ...defaultProfile, country: "RU" });
+  for (const filter of ["RU", "OTHER"]) {
+    await b.search({ ...defaultProfile, lookingForCountry: filter });
+    assert.equal(realtime.stats().conversations, 0);
+  }
+  await b.search();
+  await until(() => b.events.matches.length === 1);
+  assert.equal(b.events.matches[0].peer.country, "UNKNOWN");
+});
+
+test("connection limits use the visitor IP behind nginx and release it on disconnect", async () => {
+  const headers = { Origin: origin, "X-Forwarded-For": "8.8.8.8" };
+  const a = await visitor(headers);
+  await visitor(headers);
+  await visitor(headers);
+  const blocked = io(url, {
+    transports: ["websocket"], extraHeaders: headers,
+    autoConnect: false, reconnection: false,
+  });
+  sockets.push(blocked);
+  const rejected = new Promise<string>((resolve) =>
+    blocked.on("connect_error", (error) => resolve(error.message)));
+  blocked.connect();
+  assert.match(await rejected, /Слишком много подключений/);
+  const differentIp = await visitor({ Origin: origin, "X-Forwarded-For": "1.1.1.1" });
+  assert.equal(differentIp.socket.connected, true);
+  a.socket.disconnect();
+  await until(() => realtime.stats().online === 3);
+  const replacement = await visitor(headers);
+  assert.equal(replacement.socket.connected, true);
 });
 
 test("messages and SDP reach only the current peer; spoofed and stale sessions are rejected", async () => {
@@ -281,7 +350,7 @@ test("malformed profiles, empty/oversized messages and floods are rejected", asy
   const a = await visitor();
   const b = await visitor();
   assert.equal(
-    (await a.search({ ...defaultProfile, country: "INVALID" })).ok,
+    (await a.search({ ...defaultProfile, lookingForCountry: "INVALID" })).ok,
     false,
   );
   await a.search();
