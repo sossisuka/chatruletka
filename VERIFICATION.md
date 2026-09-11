@@ -1,5 +1,16 @@
 # Проверка приложения
 
+Дата: 11 сентября 2026. Дополнительная проверка SEO и Google Search Console для `videochatik.online`.
+
+## Результаты SEO
+
+- `npm run typecheck`: успешно.
+- `npm run lint`: без ошибок.
+- `npm run build`: успешно. Next.js собрал статические `/robots.txt`, `/sitemap.xml` и динамический route `/[verification]` для Google verification-файла.
+- Локальный production-сервер на `http://127.0.0.1:3122` с `GOOGLE_SITE_VERIFICATION_FILE=google123abc.html`: `/robots.txt` HTTP 200, `/sitemap.xml` HTTP 200, `/google123abc.html` HTTP 200.
+- Неизвестные `/google-wrong.html` и `/random-page`: HTTP 404.
+- HTML главной страницы содержит title, description, canonical `https://videochatik.online`, `robots index, follow`, `googlebot index, follow`, Open Graph и Twitter-card metadata. `noindex` больше не отдаётся.
+
 Дата: 11 сентября 2026. Дополнительная проверка после подключения серверного определения страны через 2ip и смены домена на `videochatik.online`.
 
 ## Результаты 11 сентября 2026

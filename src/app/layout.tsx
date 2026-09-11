@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { PT_Sans } from "next/font/google";
+import { siteDescription, siteName, siteTitle, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const font = PT_Sans({
@@ -9,10 +10,39 @@ const font = PT_Sans({
   display: "swap",
 });
 export const metadata: Metadata = {
-  title: "Chatruletka — встречайте новых людей",
-  description:
-    "Случайные знакомства, живые разговоры. Бесплатный видеочат с подбором собеседников в реальном времени.",
-  robots: { index: false, follow: false },
+  metadataBase: new URL(siteUrl),
+  applicationName: siteName,
+  title: {
+    default: siteTitle,
+    template: `%s | ${siteName}`,
+  },
+  description: siteDescription,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName,
+    title: siteTitle,
+    description: siteDescription,
+    locale: "ru_RU",
+  },
+  twitter: {
+    card: "summary",
+    title: siteTitle,
+    description: siteDescription,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  category: "social networking",
 };
 
 export const viewport: Viewport = {

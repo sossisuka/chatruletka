@@ -43,6 +43,7 @@ npm run dev -- --port 3005
 APP_ORIGIN=https://videochatik.online
 TWOIP_API_TOKEN=YOUR_2IP_TOKEN
 TRUST_PROXY=true
+GOOGLE_SITE_VERIFICATION_FILE=googleXXXXXXXXXXXX.html
 ```
 
 Готовый nginx-шаблон лежит в `deploy/nginx-videochatik.conf`. На сервере после обновления кода:
@@ -66,6 +67,31 @@ sudo certbot renew --dry-run
 Успешные ответы кэшируются в памяти до часа, ошибки — до минуты; кэш ограничен 2048 адресами. Повторные запросы одного IP объединяются, новые запросы отправляются с интервалом 350 мс с ограниченной очередью. Запрос к API имеет тайм-аут 2,5 секунды. При отсутствии токена, локальном IP, исчерпании лимита или ошибке API отображается «Не определена»: общий поиск работает, но такой пользователь не проходит фильтр конкретной страны. Для стран вне короткого списка сохраняются настоящее название и флаг; они входят в фильтр «Другая страна».
 
 IP-геолокация определяет страну сетевого выхода, в том числе VPN. Она не доказывает, что посетитель — человек, не устанавливает личность и не делает IP уникальным идентификатором пользователя.
+
+## SEO и Google Search Console
+
+Главная страница индексируется, canonical URL задан как `https://videochatik.online/`. Next.js генерирует `/robots.txt` и `/sitemap.xml`, а в `<head>` добавлены title, description, Open Graph и Twitter-card для сниппетов и ссылок в соцсетях.
+
+Для подтверждения сайта в Google Search Console выберите свойство URL prefix `https://videochatik.online/` и метод HTML file upload. Google выдаст файл с именем вида `googleXXXXXXXXXXXX.html`; это имя нужно задать в `.env`:
+
+```dotenv
+GOOGLE_SITE_VERIFICATION_FILE=googleXXXXXXXXXXXX.html
+```
+
+По умолчанию приложение отдаёт содержимое `google-site-verification: googleXXXXXXXXXXXX.html`. Если Google выдаст другой текст внутри файла, задайте его явно:
+
+```dotenv
+GOOGLE_SITE_VERIFICATION_CONTENT="google-site-verification: googleXXXXXXXXXXXX.html"
+```
+
+После изменения `.env` перезапустите контейнер и проверьте файл до нажатия Verify:
+
+```sh
+docker compose up -d --force-recreate app
+curl -I https://videochatik.online/googleXXXXXXXXXXXX.html
+curl https://videochatik.online/robots.txt
+curl https://videochatik.online/sitemap.xml
+```
 
 ## Как устроено
 
