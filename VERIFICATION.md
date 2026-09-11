@@ -10,6 +10,8 @@
 - Локальный production-сервер на `http://127.0.0.1:3122` с `GOOGLE_SITE_VERIFICATION_FILE=google123abc.html`: `/robots.txt` HTTP 200, `/sitemap.xml` HTTP 200, `/google123abc.html` HTTP 200.
 - Неизвестные `/google-wrong.html` и `/random-page`: HTTP 404.
 - HTML главной страницы содержит title, description, canonical `https://videochatik.online`, `robots index, follow`, `googlebot index, follow`, Open Graph и Twitter-card metadata. `noindex` больше не отдаётся.
+- Локальный production-сервер на `http://127.0.0.1:3125`: `public/googleb5037eb4a814b1fc.html` отдаётся как `/googleb5037eb4a814b1fc.html` с HTTP 200, `/manifest.webmanifest` HTTP 200, PWA-иконки 180/192/512 PNG доступны, HTML содержит `link rel="manifest"` и `link rel="apple-touch-icon"`.
+- Тексты SEO и главной страницы содержат фразы `чат-рулетка` и `для русских пользователей`. Синий фон `.remote-panel` сверён с первым коммитом `0f8c820` и возвращён к исходному градиенту `#283e5a -> #1b2b41 -> #172436`.
 
 Дата: 11 сентября 2026. Дополнительная проверка после подключения серверного определения страны через 2ip и смены домена на `videochatik.online`.
 

@@ -152,7 +152,7 @@ export function ChatApp() {
         <section className="intro" id="chat">
           <div>
             <div className="eyebrow">
-              <span /> НОВЫЙ РАЗГОВОР — НОВАЯ ИСТОРИЯ
+              <span /> ЧАТ-РУЛЕТКА ДЛЯ РУССКИХ ПОЛЬЗОВАТЕЛЕЙ
             </div>
             <h1>
               Мир ближе, чем кажется<span>.</span>
@@ -646,6 +646,17 @@ export function ChatApp() {
           </div>
         </section>
         <section className="faq-section" aria-label="Частые вопросы">
+          <details>
+            <summary>
+              Что такое VideoChatik?
+              <ChevronDown size={17} />
+            </summary>
+            <p>
+              VideoChatik — это чат-рулетка для русских пользователей: нажмите
+              «Старт», включите камеру и знакомьтесь с людьми онлайн в реальном
+              времени.
+            </p>
+          </details>
           <details>
             <summary>
               Как работает подбор собеседников?

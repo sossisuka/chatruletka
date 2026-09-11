@@ -72,9 +72,12 @@
     --feature-icon-surface: #181818;
     --feature-icon-hover-surface: #1f1f1f;
     --video-surface: #111;
-    --remote-panel-surface:
-      radial-gradient(circle at 50% 32%, rgb(62 119 196 / 16%), transparent 38%),
-      radial-gradient(ellipse at 49% 39%, #192944 0, #101a2b 54%, #0d121c 100%);
+    --remote-panel-surface: radial-gradient(
+      ellipse at 49% 39%,
+      #283e5a 0,
+      #1b2b41 51%,
+      #172436 100%
+    );
     --local-panel-surface:
       radial-gradient(circle at 48% 38%, rgb(255 255 255 / 4%), transparent 32%),
       linear-gradient(145deg, #161616, #0e0e0e);

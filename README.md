@@ -70,13 +70,15 @@ IP-геолокация определяет страну сетевого вы�
 
 ## SEO и Google Search Console
 
-Главная страница индексируется, canonical URL задан как `https://videochatik.online/`. Next.js генерирует `/robots.txt` и `/sitemap.xml`, а в `<head>` добавлены title, description, Open Graph и Twitter-card для сниппетов и ссылок в соцсетях.
+Главная страница индексируется, canonical URL задан как `https://videochatik.online/`. Next.js генерирует `/robots.txt`, `/sitemap.xml` и `/manifest.webmanifest`, а в `<head>` добавлены title, description, Open Graph, Twitter-card и Apple/PWA-иконки для сниппетов, ссылок и установки сайта на экран телефона.
 
 Для подтверждения сайта в Google Search Console выберите свойство URL prefix `https://videochatik.online/` и метод HTML file upload. Google выдаст файл с именем вида `googleXXXXXXXXXXXX.html`; это имя нужно задать в `.env`:
 
 ```dotenv
 GOOGLE_SITE_VERIFICATION_FILE=googleXXXXXXXXXXXX.html
 ```
+
+Текущий файл подтверждения уже добавлен как `public/googleb5037eb4a814b1fc.html`, поэтому после деплоя он должен открываться по адресу `https://videochatik.online/googleb5037eb4a814b1fc.html`.
 
 По умолчанию приложение отдаёт содержимое `google-site-verification: googleXXXXXXXXXXXX.html`. Если Google выдаст другой текст внутри файла, задайте его явно:
 

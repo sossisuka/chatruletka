@@ -18,6 +18,16 @@ export const metadata: Metadata = {
   },
   description: siteDescription,
   alternates: { canonical: "/" },
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [
+      {
+        url: "/assets/icons/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
+  },
   openGraph: {
     type: "website",
     url: "/",
