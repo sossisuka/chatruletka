@@ -72,4 +72,15 @@
 
 - [P3] При появлении официальных приложений можно заменить браузерные бейджи на реальные ссылки магазинов, как в источнике.
 
+## Animated noise iteration
+
+- Source visual truth: `artifacts/videochatru-app-uncovered.png`, with the live reference behavior checked at `https://videochatru.com/` in the idle state.
+- Implementation screenshot: `artifacts/chatruletka-noise-final-desktop.png` at 1262 x 624 px; CSS viewport 1262 x 624, device scale factor 1.
+- Mobile screenshot: `artifacts/chatruletka-noise-final-mobile.png` at 390 x 844 px; CSS viewport 390 x 844, device scale factor 1.
+- Focused comparison: the source and implementation remote-video regions both use a 320 x 240 canvas stretched to the panel. The source changes about 24-27 frames per second; the implementation changes at 24 frames per second.
+- Density comparison: source grayscale mean 46.36, standard deviation 12.02, q10/q50/q90 31/46/62. Implementation mean 45.61, standard deviation 12.59, q10/q50/q90 30/46/62.
+- [P2] The captured noise texture was static. Fixed by rendering live randomized grayscale frames on a canvas while retaining `noise.png` as the initial and no-script fallback.
+- Post-fix evidence: two samples 120 ms apart had different frame signatures; desktop and mobile screenshots preserve the original panel layout, and the 390 px viewport has no horizontal overflow.
+- Browser console and page errors: none.
+
 final result: passed

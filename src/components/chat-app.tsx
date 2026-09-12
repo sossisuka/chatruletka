@@ -35,6 +35,7 @@ import { VideoPane } from "./video-pane";
 import { Modal } from "./modal";
 import { CountryFlag } from "./country-flag";
 import { CountrySelect } from "./country-select";
+import { NoiseCanvas } from "./noise-canvas";
 
 type Dialog = "rules" | "privacy" | "settings" | "start" | "block" | null;
 const statusLabels = {
@@ -194,6 +195,7 @@ export function ChatApp() {
               muted={remoteMuted}
               label="Видео собеседника"
             />
+            {!chat.remoteStream && <NoiseCanvas />}
             <div className="video-top">
               <span className="video-tag">
                 <span
