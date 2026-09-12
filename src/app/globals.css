@@ -837,9 +837,14 @@ h1 > span {
 .country-flag {
   display: block;
   width: 22px;
-  height: 16px;
-  object-fit: contain;
+  height: 22px;
   flex: 0 0 22px;
+}
+.country-flag:not(.country-globe) {
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  overflow: hidden;
 }
 .country-globe {
   color: #8b9eb5;

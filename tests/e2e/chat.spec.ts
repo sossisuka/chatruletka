@@ -362,6 +362,18 @@ test("country filter supports keyboard selection and own country is read-only", 
   await page.keyboard.press("Enter");
   await expect(country).toContainText("Германия");
   await expect(country).toBeFocused();
+  const selectedFlag = country.locator(".country-flag:not(.country-globe)");
+  await expect(selectedFlag).toBeVisible();
+  const flagShape = await selectedFlag.evaluate((element) => {
+    const bounds = element.getBoundingClientRect();
+    return {
+      width: bounds.width,
+      height: bounds.height,
+      borderRadius: getComputedStyle(element).borderRadius,
+    };
+  });
+  expect(flagShape.width).toBe(flagShape.height);
+  expect(flagShape.borderRadius).toBe("50%");
   await country.click();
   await page.locator(".local-panel").click();
   await expect(page.getByRole("listbox")).not.toBeVisible();

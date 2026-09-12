@@ -98,4 +98,14 @@
 - iOS viewport: `viewport-fit=cover` is present and every landscape edge uses the corresponding safe-area inset.
 - Browser console and page errors: none.
 
+## Circular country flag iteration
+
+- Source visual truth: the circular Russian flag reference supplied in the current conversation (the client does not expose a local filesystem path).
+- Implementation desktop: `artifacts/country-flag-circle-desktop.png`, 1262 x 624 px, CSS viewport 1262 x 624, device scale factor 1.
+- Implementation iPhone landscape: `artifacts/country-flag-circle-iphone-landscape.png`, 932 x 430 px, device scale factor 1.
+- [P2] FlagCDN SVGs kept their rectangular 22 x 16 aspect ratio. Fixed by giving country images equal width and height, a 50% radius, centered cover cropping, and matching intrinsic dimensions.
+- Post-fix measurements: desktop flag 24 x 24 px; short landscape flag 18 x 18 px; computed border radius 50% in both layouts.
+- The country selector remains keyboard accessible, the globe fallback is unchanged, and both checked layouts have zero horizontal overflow.
+- Automated verification: Playwright 10/10 scenarios passed, including the circular selected-flag assertion.
+
 final result: passed

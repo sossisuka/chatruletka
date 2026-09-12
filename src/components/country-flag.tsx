@@ -11,7 +11,7 @@ export function CountryFlag({ code }: { code: string }) {
       className="country-flag"
       src={`https://flagcdn.com/${code.toLowerCase()}.svg`}
       width={22}
-      height={16}
+      height={22}
       alt=""
       aria-hidden="true"
       unoptimized
