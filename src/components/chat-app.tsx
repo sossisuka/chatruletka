@@ -22,7 +22,6 @@ import {
   ShieldOff,
   SkipForward,
   Square,
-  Users,
   Video,
   VideoOff,
   Volume2,
@@ -30,11 +29,12 @@ import {
   X,
 } from "lucide-react";
 import { useVideoChat } from "@/hooks/use-video-chat";
-import { countryName, type Gender } from "@/lib/protocol";
+import { countryName } from "@/lib/protocol";
 import { VideoPane } from "./video-pane";
 import { Modal } from "./modal";
 import { CountryFlag } from "./country-flag";
 import { CountrySelect } from "./country-select";
+import { GenderSelect } from "./gender-select";
 import { NoiseCanvas } from "./noise-canvas";
 
 type Dialog = "rules" | "privacy" | "settings" | "start" | "block" | null;
@@ -466,28 +466,13 @@ export function ChatApp() {
                   chat.updateProfile({ ...chat.profile, lookingForCountry: country })
                 }
               />
-              <label className="filter">
-                <Users size={19} />
-                <span>
-                  <small>Ваш пол</small>
-                  <select
-                    aria-label="Ваш пол"
-                    value={chat.profile.gender}
-                    disabled={active}
-                    onChange={(e) =>
-                      chat.updateProfile({
-                        ...chat.profile,
-                        gender: e.target.value as Gender,
-                      })
-                    }
-                  >
-                    <option value="other">Ваш пол</option>
-                    <option value="male">Мужчина</option>
-                    <option value="female">Женщина</option>
-                  </select>
-                </span>
-                <ChevronDown size={15} />
-              </label>
+              <GenderSelect
+                value={chat.profile.gender}
+                disabled={active}
+                onChange={(gender) =>
+                  chat.updateProfile({ ...chat.profile, gender })
+                }
+              />
             </div>
             <p className="filter-hint">
               {active ? (

@@ -108,4 +108,17 @@
 - The country selector remains keyboard accessible, the globe fallback is unchanged, and both checked layouts have zero horizontal overflow.
 - Automated verification: Playwright 10/10 scenarios passed, including the circular selected-flag assertion.
 
+## Gender selector iteration
+
+- Source visual truth: the opened gender selector screenshot supplied in the current conversation, plus the user-supplied `home.7712b684.css`, `common.cdcbdc83.css`, and `home.888074a8.js` reference files.
+- Supplied assets: `gender-male-icon.svg`, `gender-female-icon.svg`, and `gender-any-icon.svg`; the last asset represents the couple option.
+- Implementation desktop: `artifacts/gender-menu-desktop-final.png`, 1262 x 624 px, CSS viewport 1262 x 624, device scale factor 1.
+- Implementation mobile portrait: `artifacts/gender-menu-mobile-portrait-final.png`, 390 x 844 px.
+- Implementation iPhone landscape: `artifacts/gender-menu-iphone-landscape-final.png`, 932 x 430 px.
+- [P1] The native browser select could not reproduce the supplied popup and varied by device. Replaced it with an accessible React combobox/listbox containing Male, Female, and Couple choices with the supplied avatar assets.
+- [P2] The closed control wrapped its label on narrow tiles. Fixed with a full-width trigger, compact spacing, and a single-line label.
+- [P2] The 210 px menu initially extended 26 px beyond the left edge at the 390 px portrait viewport. Fixed with portrait-specific left alignment; the final bounds are 11-221 px and horizontal overflow is zero.
+- The selected/highlighted option uses `#2d8dec`, the popup opens above the lower control when space permits, and all options support pointer and keyboard selection.
+- Automated verification: Playwright 11/11 scenarios passed, including avatar mapping, pointer selection, keyboard selection, menu bounds, and the existing realtime chat flow.
+
 final result: passed

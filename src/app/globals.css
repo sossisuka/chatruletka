@@ -929,6 +929,72 @@ h1 > span {
 .country-options [aria-selected="true"] {
   color: var(--blue);
 }
+.gender-select {
+  padding: 0;
+}
+.gender-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 10px 15px;
+  border-radius: inherit;
+  background: transparent;
+  color: var(--ink);
+  font-size: 14px;
+  cursor: pointer;
+}
+.gender-trigger:disabled {
+  color: #a0a7b2;
+  cursor: not-allowed;
+}
+.gender-value {
+  white-space: nowrap;
+}
+.gender-icon,
+.gender-option-icon {
+  display: block;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+}
+.gender-options {
+  position: absolute;
+  z-index: 35;
+  left: 0;
+  top: calc(100% + 4px);
+  width: 100%;
+  min-width: 210px;
+  margin: 0;
+  padding: 10px 14px;
+  list-style: none;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgb(0 0 0 / 28%);
+}
+.gender-select[data-placement="top"] .gender-options {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+.gender-options li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 14px;
+  border-radius: 9px;
+  color: #555;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+.gender-options .is-highlighted {
+  background: #2d8dec;
+  color: #fff;
+}
 .settings-country {
   border-radius: 9px;
   background: var(--panel-soft);
@@ -2852,6 +2918,35 @@ main {
   background: var(--roulette-button-gray);
 }
 
+.controls-panel .filter.gender-select {
+  padding: 0;
+}
+
+.controls-panel .gender-trigger {
+  padding: 0 5px;
+  color: #4d4d4d;
+  font-size: clamp(18px, 2vw, 25px);
+  font-weight: 400;
+}
+
+.controls-panel .gender-icon {
+  width: 26px;
+  height: 26px;
+  flex-basis: 26px;
+}
+
+.controls-panel .gender-options {
+  right: 0;
+  left: auto;
+  padding: 10px 14px;
+  border-radius: 20px;
+}
+
+.controls-panel .gender-options li {
+  min-height: 44px;
+  font-size: clamp(17px, 1.65vw, 21px);
+}
+
 .controls-panel .filter > svg:first-child {
   position: absolute;
   right: 15px;
@@ -3549,6 +3644,7 @@ main {
   .start-button strong,
   .stop-button strong,
   .controls-panel .filter select,
+  .controls-panel .gender-trigger,
   .controls-panel .country-value > span::before {
     font-size: 21px;
   }
@@ -3865,6 +3961,7 @@ main {
   }
 
   .controls-panel .filter select,
+  .controls-panel .gender-trigger,
   .controls-panel .country-value > span::before {
     font-size: clamp(18px, 5.5vw, 24px);
   }
@@ -4132,12 +4229,42 @@ main {
   }
 
   .controls-panel .filter select,
+  .controls-panel .gender-trigger,
   .controls-panel .country-value > span::before {
     font-size: clamp(14px, 1.95vw, 18px);
   }
 
   .controls-panel .filter select {
     padding-right: 24px;
+  }
+
+  .controls-panel .gender-trigger {
+    gap: 5px;
+    padding: 0 5px;
+  }
+
+  .controls-panel .gender-icon {
+    width: 20px;
+    height: 20px;
+    flex-basis: 20px;
+  }
+
+  .controls-panel .gender-options {
+    min-width: 170px;
+    padding: 7px 9px;
+    border-radius: 14px;
+  }
+
+  .controls-panel .gender-options li {
+    min-height: 36px;
+    padding: 5px 9px;
+    font-size: 16px;
+  }
+
+  .controls-panel .gender-option-icon {
+    width: 22px;
+    height: 22px;
+    flex-basis: 22px;
   }
 
   .controls-panel .country-trigger {
@@ -4279,5 +4406,12 @@ main {
   .login-modal .modal-heading .icon-button {
     width: 38px;
     height: 38px;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 600px) {
+  .controls-panel .gender-options {
+    right: auto;
+    left: 0;
   }
 }

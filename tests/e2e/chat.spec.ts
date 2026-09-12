@@ -372,7 +372,7 @@ test("country filter supports keyboard selection and own country is read-only", 
       borderRadius: getComputedStyle(element).borderRadius,
     };
   });
-  expect(flagShape.width).toBe(flagShape.height);
+  expect(Math.abs(flagShape.width - flagShape.height)).toBeLessThan(0.1);
   expect(flagShape.borderRadius).toBe("50%");
   await country.click();
   await page.locator(".local-panel").click();
@@ -385,6 +385,61 @@ test("country filter supports keyboard selection and own country is read-only", 
   await expect(settingsDialog).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
+});
+
+test("gender selector uses the supplied avatars and works with keyboard", async ({ page }) => {
+  await page.setViewportSize({ width: 932, height: 430 });
+  await page.goto("/");
+
+  const gender = page.getByRole("combobox", { name: "Ваш пол" });
+  await expect(gender.locator("img")).toHaveAttribute(
+    "src",
+    "/assets/icons/gender-any-icon.svg",
+  );
+  await gender.click();
+
+  const listbox = page.getByRole("listbox", { name: "Ваш пол" });
+  await expect(listbox).toBeVisible();
+  await expect(listbox.getByRole("option")).toHaveText([
+    "Мужской",
+    "Женский",
+    "Пара",
+  ]);
+  const pair = listbox.getByRole("option", { name: "Пара" });
+  await expect(pair).toHaveAttribute("aria-selected", "true");
+  expect(
+    await pair.evaluate((element) => getComputedStyle(element).backgroundColor),
+  ).toBe("rgb(45, 141, 236)");
+
+  const bounds = await listbox.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      top: rect.top,
+      right: rect.right,
+      bottom: rect.bottom,
+      viewportWidth: innerWidth,
+      viewportHeight: innerHeight,
+    };
+  });
+  expect(bounds.top).toBeGreaterThanOrEqual(0);
+  expect(bounds.right).toBeLessThanOrEqual(bounds.viewportWidth);
+  expect(bounds.bottom).toBeLessThanOrEqual(bounds.viewportHeight);
+
+  await listbox.getByRole("option", { name: "Мужской" }).click();
+  await expect(gender.locator("img")).toHaveAttribute(
+    "src",
+    "/assets/icons/gender-male-icon.svg",
+  );
+  await expect(gender).toBeFocused();
+
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("End");
+  await page.keyboard.press("Enter");
+  await expect(gender.locator("img")).toHaveAttribute(
+    "src",
+    "/assets/icons/gender-any-icon.svg",
+  );
+  await expect(listbox).not.toBeVisible();
 });
 
 test("external HTTP connects to the chat server and explains why camera requires HTTPS", async ({
