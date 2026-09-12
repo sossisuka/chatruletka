@@ -159,6 +159,32 @@ docker compose --profile public --profile turn up --build -d
 
 `TURN_SECRET` доступен только серверу. Клиент получает подписанный HMAC временный пароль, действительный 24 часа. Для сессии дольше суток нужно перезагрузить вкладку. Для сетей, разрешающих только TLS на 443, используйте отдельный TURN-сервер с TLS и добавьте `turns:turn.example.com:443?transport=tcp` в `TURN_URLS`. В комплектном coturn-профиле TLS не настроен.
 
+## Telegram-бот
+
+Бот работает через Next.js webhook `POST /api/telegram/webhook`. На команду `/start` он отправляет приветствие и обычную кнопку-ссылку на `https://videochatik.online/`. Токен и секрет webhook используются только на сервере.
+
+Добавьте в серверный `.env`:
+
+```dotenv
+TELEGRAM_BOT_TOKEN=YOUR_NEW_BOT_TOKEN
+TELEGRAM_WEBHOOK_SECRET=YOUR_RANDOM_SECRET
+TELEGRAM_SITE_URL=https://videochatik.online/
+```
+
+Секрет webhook можно создать так:
+
+```sh
+openssl rand -hex 32
+```
+
+После сборки и запуска контейнера один раз зарегистрируйте webhook и команду `/start`:
+
+```sh
+docker compose exec app npm run telegram:webhook
+```
+
+Скрипт регистрирует `https://videochatik.online/api/telegram/webhook`, включает проверку заголовка Telegram и не выводит токен в консоль.
+
 ## Проверки
 
 ```sh
