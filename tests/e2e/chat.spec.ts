@@ -290,6 +290,67 @@ test("mobile layout, settings, consent and rules work without overflow", async (
   ).toBeEnabled();
 });
 
+test("phone landscape keeps roulette controls, chat and consent dialog in the viewport", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 932, height: 430 });
+  await page.goto("/");
+
+  const layout = await page.evaluate(() => {
+    const box = (selector: string) => {
+      const rect = document.querySelector(selector)?.getBoundingClientRect();
+      if (!rect) throw new Error(`Missing ${selector}`);
+      return { top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
+    };
+
+    return {
+      viewportHeight: innerHeight,
+      overflow: document.documentElement.scrollWidth > innerWidth,
+      workspace: box(".chat-workspace"),
+      remote: box(".remote-panel"),
+      local: box(".local-panel"),
+      controls: box(".controls-panel"),
+      chat: box(".text-chat"),
+    };
+  });
+
+  expect(layout.overflow).toBe(false);
+  expect(layout.workspace.height).toBeLessThanOrEqual(layout.viewportHeight);
+  expect(layout.remote.height).toBeGreaterThan(250);
+  expect(layout.local.bottom).toBeLessThanOrEqual(layout.viewportHeight);
+  expect(layout.controls.top).toBeGreaterThanOrEqual(layout.remote.bottom - 1);
+  expect(layout.controls.bottom).toBeLessThanOrEqual(layout.viewportHeight);
+  expect(layout.chat.bottom).toBeLessThanOrEqual(layout.viewportHeight);
+
+  await page.locator(".start-button").click();
+  const dialog = page.locator(".login-modal");
+  await expect(dialog).toBeVisible();
+
+  const dialogLayout = await dialog.evaluate((element) => {
+    const dialogRect = element.getBoundingClientRect();
+    const buttonRect = element
+      .querySelector(".modal-primary")
+      ?.getBoundingClientRect();
+
+    if (!buttonRect) throw new Error("Missing consent button");
+
+    return {
+      viewportHeight: innerHeight,
+      top: dialogRect.top,
+      bottom: dialogRect.bottom,
+      clientHeight: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+      buttonBottom: buttonRect.bottom,
+    };
+  });
+
+  expect(dialogLayout.top).toBeGreaterThanOrEqual(0);
+  expect(dialogLayout.bottom).toBeLessThanOrEqual(dialogLayout.viewportHeight);
+  expect(dialogLayout.buttonBottom).toBeLessThanOrEqual(dialogLayout.bottom);
+  expect(dialogLayout.scrollHeight).toBeLessThanOrEqual(dialogLayout.clientHeight);
+});
+
 test("country filter supports keyboard selection and own country is read-only", async ({ page }) => {
   await page.goto("/");
   const country = page.getByRole("combobox", { name: "Страна собеседника" });

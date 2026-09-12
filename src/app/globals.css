@@ -4026,3 +4026,253 @@ main {
     color: #fff;
   }
 }
+
+/* Keep the complete roulette workspace inside short phone landscape viewports. */
+@media (orientation: landscape) and (max-width: 1000px) and (max-height: 500px) {
+  html {
+    background: var(--roulette-sky);
+  }
+
+  body {
+    background: #fff;
+  }
+
+  .chat-workspace {
+    grid-template-areas:
+      "remote local"
+      "controls chat";
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr) clamp(96px, 26dvh, 112px);
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
+    padding:
+      max(0px, env(safe-area-inset-top))
+      max(8px, env(safe-area-inset-right))
+      max(6px, env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
+    gap: 0;
+  }
+
+  .video-panel,
+  .remote-panel,
+  .local-panel {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .remote-placeholder {
+    padding: 8px;
+  }
+
+  .connection-orbit {
+    width: 100px;
+    height: 92px;
+  }
+
+  .hero-mark .revolver-icon {
+    width: 88px;
+    height: 88px;
+  }
+
+  .remote-placeholder h2 {
+    margin-top: 3px;
+    font-size: clamp(22px, 3vw, 28px);
+  }
+
+  .remote-online {
+    margin-top: 12px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .remote-online .live-dot {
+    width: 12px;
+    height: 12px;
+  }
+
+  .local-placeholder.is-waiting .camera-placeholder {
+    width: 72px;
+    height: 72px;
+  }
+
+  .controls-panel,
+  .text-chat {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .controls-panel {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+    gap: 6px;
+    padding: 6px 6px 0 0;
+  }
+
+  .start-button,
+  .stop-button,
+  .controls-panel .filter {
+    height: 100%;
+    min-height: 0;
+    padding: 0 7px;
+    border-radius: 8px;
+  }
+
+  .start-button strong,
+  .stop-button strong {
+    font-size: clamp(16px, 2.15vw, 20px);
+  }
+
+  .controls-panel .filter select,
+  .controls-panel .country-value > span::before {
+    font-size: clamp(14px, 1.95vw, 18px);
+  }
+
+  .controls-panel .filter select {
+    padding-right: 24px;
+  }
+
+  .controls-panel .country-trigger {
+    padding: 0 24px 0 6px;
+  }
+
+  .controls-panel .filter > svg:first-child,
+  .controls-panel .country-trigger .country-flag,
+  .controls-panel .country-trigger .country-globe {
+    right: 7px;
+    bottom: calc(50% - 9px);
+    width: 18px;
+    height: 18px;
+  }
+
+  .text-chat {
+    margin: 0;
+    border-radius: 0 0 10px;
+  }
+
+  .messages {
+    padding: 6px 8px 0;
+  }
+
+  .system-warning {
+    min-height: 0;
+    gap: 6px;
+  }
+
+  .system-avatar {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+  }
+
+  .system-avatar .revolver-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .system-warning p {
+    min-height: 0;
+    padding: 7px 9px;
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .message-form {
+    flex-basis: 34px;
+    height: 34px;
+    padding: 0 8px;
+  }
+
+  .chat-workspace[data-status="connected"] .text-chat-header {
+    min-height: 28px;
+    padding: 4px 8px;
+  }
+
+  .login-modal {
+    width: min(
+      900px,
+      calc(
+        100vw - 32px - env(safe-area-inset-left) -
+          env(safe-area-inset-right)
+      )
+    );
+    height: min(
+      360px,
+      calc(
+        100dvh - 20px - env(safe-area-inset-top) -
+          env(safe-area-inset-bottom)
+      )
+    );
+    max-height: calc(
+      100dvh - 20px - env(safe-area-inset-top) -
+        env(safe-area-inset-bottom)
+    );
+    margin: auto;
+    overflow: hidden;
+    border-radius: 16px;
+  }
+
+  .login-modal .modal-inner,
+  .login-popup-layout {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .login-popup-layout {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+
+  .login-popup-brand {
+    padding: 20px 24px;
+  }
+
+  .logo-vertical {
+    width: min(230px, 100%);
+    height: 158px;
+  }
+
+  .login-popup-brand .remote-online {
+    margin-top: 6px;
+    font-size: 12px;
+  }
+
+  .login-popup-actions {
+    padding: 22px 34px 20px 0;
+  }
+
+  .login-popup-actions h3 {
+    font-size: clamp(25px, 3.4vw, 31px);
+    line-height: 1.05;
+  }
+
+  .login-popup-actions p {
+    margin-top: 9px;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .login-modal .consent {
+    margin-top: 14px;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .login-modal .modal-primary {
+    height: 44px;
+    margin-top: 12px;
+    font-size: 15px;
+  }
+
+  .login-modal .modal-heading {
+    top: 8px;
+    right: 8px;
+  }
+
+  .login-modal .modal-heading .icon-button {
+    width: 38px;
+    height: 38px;
+  }
+}

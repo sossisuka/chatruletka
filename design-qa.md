@@ -83,4 +83,19 @@
 - Post-fix evidence: two samples 120 ms apart had different frame signatures; desktop and mobile screenshots preserve the original panel layout, and the 390 px viewport has no horizontal overflow.
 - Browser console and page errors: none.
 
+## iPhone landscape iteration
+
+- Source visual truth: the two iPhone 15 Pro Max landscape screenshots supplied in the current conversation (1266 x 590 px attachment; the client does not expose a local filesystem path).
+- Density normalization: the device capture was evaluated at the iPhone 15 Pro Max logical landscape viewport of 932 x 430 CSS px; implementation device scale factor 1.
+- Implementation full view: `artifacts/iphone-15-pro-max-landscape-final.png`, 932 x 430 px, idle state.
+- Implementation consent state: `artifacts/iphone-15-pro-max-landscape-modal-final.png`, 932 x 430 px.
+- Additional short viewport evidence: `artifacts/iphone-landscape-short-after.png` and `artifacts/iphone-landscape-short-modal-after.png`, 844 x 390 px.
+- Focused comparison: before the fix, `artifacts/iphone-15-pro-max-landscape-before.png` measured the workspace at 520 px high and placed controls/chat at bottom 512 in a 430 px viewport. After the fix, the workspace is 430 px high; video panels end at 312.2 px and controls/chat end at 424 px.
+- [P1] The `max-width: 1000px` breakpoint forced a 520 px minimum workspace height on a 430 px landscape viewport, cropping every primary control and the chat input. Fixed with a dedicated short-landscape 100dvh grid, compact 112 px control row, and iOS safe-area padding.
+- [P1] The consent layout retained its 472 px desktop minimum height and opened as a cropped scrolling dialog. Fixed with a centered 360 px landscape dialog, compact logo/content spacing, and no internal overflow. Post-fix bounds are top 35 px, bottom 395 px, with scroll height equal to client height.
+- At 844 x 390, controls and chat remain within the viewport and the complete consent dialog stays between 15 px and 375 px.
+- Primary interactions tested: Start opens consent, checkbox/button state remains functional, and the existing roulette flow remains intact.
+- iOS viewport: `viewport-fit=cover` is present and every landscape edge uses the corresponding safe-area inset.
+- Browser console and page errors: none.
+
 final result: passed
