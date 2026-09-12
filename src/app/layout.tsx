@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { PT_Sans } from "next/font/google";
+import { Noto_Sans } from "next/font/google";
 import { siteDescription, siteName, siteTitle, siteUrl } from "@/lib/site";
 import "./globals.css";
 
-const font = PT_Sans({
+const font = Noto_Sans({
   subsets: ["latin", "cyrillic"],
-  weight: ["400", "700"],
-  variable: "--font-pt-sans",
+  weight: ["400", "500", "700"],
+  variable: "--font-noto-sans",
   display: "swap",
 });
 export const metadata: Metadata = {
@@ -57,8 +57,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7f9fc" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b0b0b" },
+    { media: "(prefers-color-scheme: light)", color: "#c1d6e6" },
+    { media: "(prefers-color-scheme: dark)", color: "#c1d6e6" },
   ],
 };
 

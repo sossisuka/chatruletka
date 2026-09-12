@@ -269,17 +269,15 @@ test("mobile layout, settings, consent and rules work without overflow", async (
   expect(await page.evaluate(() => scrollY)).toBe(0);
   await page.screenshot({ path: "artifacts/mobile.png", fullPage: true });
   await page.getByRole("button", { name: "Настройки", exact: true }).click();
+  const settingsDialog = page.getByRole("dialog", { name: "Ваши настройки" });
   await expect(
-    page.getByRole("dialog", { name: "Ваши настройки" }),
+    settingsDialog,
   ).toBeVisible();
-  await expect(page.getByRole("combobox", { name: "Ваша страна", exact: true })).toHaveCount(0);
-  await expect(page.locator(".detected-country")).toContainText("Не определена");
-  await expect(page.getByRole("dialog")).toContainText("Поиск по всему миру доступен");
+  await expect(settingsDialog.getByRole("combobox")).toHaveCount(0);
+  await expect(settingsDialog.locator(".detected-country")).toContainText("Не определена");
+  await expect(settingsDialog).toContainText("Поиск по всему миру доступен");
   await page.getByRole("button", { name: "Готово" }).click();
-  await expect(
-    page.getByText("Ваша страна: Не определена.", { exact: false }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Правила сообщества" }).click();
+  await page.getByRole("button", { name: "правилам" }).click();
   await expect(page.getByRole("dialog")).toContainText("Только для взрослых");
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Старт Начать знакомство" }).click();
@@ -304,13 +302,14 @@ test("country filter supports keyboard selection and own country is read-only", 
   await expect(country).toContainText("Германия");
   await expect(country).toBeFocused();
   await country.click();
-  await page.getByRole("heading", { name: "Мир ближе, чем кажется." }).click();
+  await page.locator(".local-panel").click();
   await expect(page.getByRole("listbox")).not.toBeVisible();
 
   await page.getByRole("button", { name: "Настройки", exact: true }).click();
-  await expect(page.getByRole("combobox", { name: "Ваша страна", exact: true })).toHaveCount(0);
-  await expect(page.locator(".detected-country")).toContainText("Не определена");
-  await expect(page.getByRole("dialog")).toBeVisible();
+  const settingsDialog = page.getByRole("dialog", { name: "Ваши настройки" });
+  await expect(settingsDialog.getByRole("combobox")).toHaveCount(0);
+  await expect(settingsDialog.locator(".detected-country")).toContainText("Не определена");
+  await expect(settingsDialog).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
 });
@@ -320,7 +319,7 @@ test("external HTTP connects to the chat server and explains why camera requires
 }) => {
   const failures: string[] = [];
   page.on("pageerror", (error) => failures.push(error.message));
-  await page.goto("http://chatruletka.test:3005/");
+  await page.goto(process.env.TEST_EXTERNAL_URL || "http://chatruletka.test:3005/");
   await expect(
     page.getByRole("button", { name: "Старт Начать знакомство" }),
   ).toBeEnabled();

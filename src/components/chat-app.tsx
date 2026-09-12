@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowDown,
@@ -8,7 +9,6 @@ import {
   ChevronDown,
   CircleHelp,
   Globe2,
-  HeartHandshake,
   Info,
   LoaderCircle,
   Maximize,
@@ -38,7 +38,7 @@ import { CountrySelect } from "./country-select";
 
 type Dialog = "rules" | "privacy" | "settings" | "start" | "block" | null;
 const statusLabels = {
-  idle: "Готовы к знакомству?",
+  idle: "ВидеоЧат RU",
   requesting: "Включаем вашу камеру…",
   searching: "Ищем собеседника…",
   connecting: "Устанавливаем связь…",
@@ -225,6 +225,13 @@ export function ChatApp() {
                 <h2 key={`heading-${chat.status}`} className="status-heading">
                   {statusLabels[chat.status]}
                 </h2>
+                <span className="remote-online">
+                  <span className="live-dot" />
+                  {chat.serverConnected
+                    ? chat.stats.online.toLocaleString("ru-RU")
+                    : "…"}{" "}
+                  пользователей онлайн
+                </span>
                 <p
                   key={`description-${chat.status}`}
                   className="status-description"
@@ -250,6 +257,16 @@ export function ChatApp() {
                     {chat.stats.searching} в поиске · {chat.stats.online} онлайн
                   </span>
                 )}
+                <div className="browser-badges" aria-hidden="true">
+                  <span>
+                    <Play size={26} fill="currentColor" />
+                    Общайся в браузере
+                  </span>
+                  <span>
+                    <ShieldCheck size={27} />
+                    Без регистрации
+                  </span>
+                </div>
               </div>
             )}
             <div className="video-bottom">
@@ -327,9 +344,19 @@ export function ChatApp() {
               </span>
             </div>
             {(!chat.localStream || !chat.cameraOn) && (
-              <div className="local-placeholder">
+              <div
+                className={`local-placeholder${!chat.localStream ? " is-waiting" : ""}`}
+              >
                 <span className="camera-placeholder">
-                  <VideoOff size={30} strokeWidth={1.4} />
+                  {chat.localStream ? (
+                    <VideoOff size={30} strokeWidth={1.4} />
+                  ) : (
+                    <LoaderCircle
+                      size={72}
+                      strokeWidth={3}
+                      className="spin idle-camera-loader"
+                    />
+                  )}
                 </span>
                 <h3>
                   {chat.localStream ? "Камера выключена" : "Здесь будете вы"}
@@ -373,8 +400,8 @@ export function ChatApp() {
                 {chat.cameraOn ? <Video size={19} /> : <VideoOff size={19} />}
               </button>
               <button
-                aria-label="Настройки видео"
-                title="Настройки видео"
+                aria-label="Настройки"
+                title="Настройки"
                 onClick={() => setDialog("settings")}
               >
                 <Settings2 size={19} />
@@ -452,7 +479,7 @@ export function ChatApp() {
                       })
                     }
                   >
-                    <option value="other">Не указан</option>
+                    <option value="other">Ваш пол</option>
                     <option value="male">Мужчина</option>
                     <option value="female">Женщина</option>
                   </select>
@@ -515,19 +542,17 @@ export function ChatApp() {
               aria-label="Сообщения разговора"
             >
               {chat.messages.length === 0 ? (
-                <div className="empty-chat">
-                  <span className="empty-chat-icon">
-                    <MessageCircle size={23} strokeWidth={1.5} />
+                <div className="system-warning">
+                  <span className="system-avatar">
+                    <span className="revolver-icon" aria-hidden="true" />
                   </span>
-                  <h3>
-                    {paired
-                      ? "Начните с простого «Привет!»"
-                      : "Разговор начинается с «Привет!»"}
-                  </h3>
                   <p>
-                    {paired
-                      ? "Пишите здесь — собеседник увидит ваше сообщение."
-                      : "Здесь можно написать собеседнику, когда вы подключитесь."}
+                    Нажав «Старт», вы обязуетесь следовать нашим{" "}
+                    <button type="button" onClick={() => setDialog("rules")}>
+                      правилам
+                    </button>
+                    . Любое нарушение приведет к блокировке аккаунта.
+                    Убедитесь, что ваше лицо хорошо видно собеседнику.
                   </p>
                 </div>
               ) : (
@@ -555,8 +580,8 @@ export function ChatApp() {
                 aria-label="Сообщение собеседнику"
                 placeholder={
                   paired
-                    ? "Напишите сообщение…"
-                    : "Сначала найдите собеседника…"
+                    ? "Введите сообщение…"
+                    : "Введите сюда текст сообщения и нажмите Enter"
                 }
                 value={draft}
                 onChange={(e) => setDraft({ sessionId, text: e.target.value })}
@@ -594,70 +619,92 @@ export function ChatApp() {
           </div>
         )}
 
+        <section className="reference-logo" aria-label="ВидеоЧат RU">
+          <span className="revolver-icon" aria-hidden="true" />
+          <span>ВидеоЧат RU</span>
+        </section>
+
         <section id="how-it-works" className="how-section">
           <div className="section-heading">
             <div>
-              <span className="eyebrow">ПРОСТО БУДЬТЕ СОБОЙ</span>
-              <h2>Незнакомцы. Пока что.</h2>
+              <span className="eyebrow">БЕСПЛАТНЫЙ ВИДЕОЧАТ ДЛЯ ОБЩЕНИЯ</span>
+              <h1>Знакомься и Заводи Друзей в Чат Рулетке</h1>
             </div>
             <p>
-              Иногда лучший разговор — тот,
-              <br />
-              которого вы не планировали.
+              VideoChatik помогает встретить нового человека без анкет,
+              переписок на неделю и лишних шагов.
             </p>
           </div>
           <div className="feature-grid">
             <article>
-              <span className="feature-icon">
-                <Video size={23} />
+              <span className="feature-illustration" aria-hidden="true">
+                <Image
+                  src="/assets/images/1-chatruletka-videochat.svg"
+                  alt=""
+                  width={46}
+                  height={112}
+                  loading="eager"
+                />
               </span>
               <div>
-                <h3>Один клик — и вы на связи</h3>
+                <h3>Начни общение в один клик</h3>
                 <p>
-                  Включите камеру и нажмите «Старт». <br />
-                  Мы найдём того, кто тоже готов пообщаться.
+                  Нажмите «Старт», разрешите доступ к камере и микрофону —
+                  система подберёт собеседника в реальном времени.
                 </p>
               </div>
             </article>
             <article>
-              <span className="feature-icon">
-                <Globe2 size={23} />
+              <span className="feature-illustration" aria-hidden="true">
+                <Image
+                  src="/assets/images/2-random-videochat.svg"
+                  alt=""
+                  width={189}
+                  height={273}
+                  loading="eager"
+                />
               </span>
               <div>
-                <h3>Знакомства без границ</h3>
+                <h3>Найди свою половинку или нового друга</h3>
                 <p>
-                  Выбирайте страну или доверьтесь случаю. <br />
-                  Каждый разговор — маленькое открытие.
+                  Видеочат подходит для случайных знакомств, лёгкой беседы
+                  вечером и общения с людьми из других стран.
                 </p>
               </div>
             </article>
             <article>
-              <span className="feature-icon">
-                <HeartHandshake size={23} />
+              <span className="feature-illustration" aria-hidden="true">
+                <Image
+                  src="/assets/images/3-chat-ruletka.svg"
+                  alt=""
+                  width={141}
+                  height={227}
+                  loading="eager"
+                />
               </span>
               <div>
-                <h3>В своём ритме</h3>
+                <h3>Преимущества чат-рулетки</h3>
                 <p>
-                  Общайтесь сколько хочется. Нажмите <br />
-                  «Далее», когда захотите встретить другого.
+                  Простой интерфейс, быстрый старт, выбор страны, живое видео
+                  и кнопка «Далее», если хочется продолжить поиск.
                 </p>
               </div>
             </article>
           </div>
         </section>
         <section className="faq-section" aria-label="Частые вопросы">
-          <details>
+          <details open>
             <summary>
-              Что такое VideoChatik?
+              Почему чат Рулетка — отличная альтернатива приложениям для знакомств?
               <ChevronDown size={17} />
             </summary>
             <p>
-              VideoChatik — это чат-рулетка для русских пользователей: нажмите
-              «Старт», включите камеру и знакомьтесь с людьми онлайн в реальном
-              времени.
+              Здесь не нужно листать анкеты и ждать ответа. Камера сразу
+              показывает живого человека, поэтому проще понять настроение,
+              услышать голос и начать настоящий разговор.
             </p>
           </details>
-          <details>
+          <details open>
             <summary>
               Как работает подбор собеседников?
               <ChevronDown size={17} />
@@ -670,20 +717,19 @@ export function ChatApp() {
               не подбирается повторно сразу после «Далее».
             </p>
           </details>
-          <details>
+          <details open>
             <summary>
-              Почему не включается камера?
+              Найди собеседника на вечер
               <ChevronDown size={17} />
             </summary>
             <p>
-              Разрешите камеру и микрофон в адресной строке браузера. Закройте
-              приложения, которые могут использовать камеру. Доступ к
-              устройствам работает на HTTPS и localhost. Если связь не
-              устанавливается в некоторых сетях, администратору приложения нужно
-              подключить TURN-сервер.
+              Открой сайт, нажми «Старт» и оставайся на странице. Если рядом
+              есть другой пользователь с совместимыми настройками, видеосвязь
+              начнётся автоматически. Если никого нет, поиск продолжится до
+              появления нового участника.
             </p>
           </details>
-          <details>
+          <details open>
             <summary>
               Сохраняются ли мои разговоры?
               <ChevronDown size={17} />
@@ -695,6 +741,19 @@ export function ChatApp() {
               записать экран — учитывайте это при общении.
             </p>
           </details>
+        </section>
+        <section className="closing-story" aria-label="Общение в Чат Рулетке">
+          <p>
+            Делись историями, обменивайся идеями и заводи новые знакомства в
+            бесплатном видеочате Рулетка!
+          </p>
+          <Image
+            src="/assets/images/videochat-chatruletka-illustration.svg"
+            alt="Люди общаются в видеочате"
+            width={495}
+            height={316}
+            loading="eager"
+          />
         </section>
       </main>
       <footer className="site-footer">
@@ -715,42 +774,48 @@ export function ChatApp() {
       </footer>
 
       {dialog === "start" && (
-        <Modal title="Перед знакомством" onClose={() => setDialog(null)}>
-          <div className="modal-hero-icon">
-            <Video size={30} />
+        <Modal
+          title="Найди новых друзей"
+          className="login-modal"
+          onClose={() => setDialog(null)}
+        >
+          <div className="login-popup-layout">
+            <div className="login-popup-brand">
+              <span className="logo-vertical" aria-hidden="true" />
+              <span className="remote-online">
+                <span className="live-dot" />
+                {chat.serverConnected
+                  ? chat.stats.online.toLocaleString("ru-RU")
+                  : "…"}{" "}
+                пользователей онлайн
+              </span>
+            </div>
+            <div className="login-popup-actions">
+              <h3>Найди новых друзей</h3>
+              <p>
+                Разрешите камеру и микрофон, чтобы начать случайный видеочат
+                прямо сейчас.
+              </p>
+              <label className="consent">
+                <input
+                  type="checkbox"
+                  checked={ageChecked}
+                  onChange={(e) => setAgeChecked(e.target.checked)}
+                />
+                <span>
+                  Я подтверждаю, что мне уже исполнилось 18 лет. Я принимаю
+                  правила сообщества.
+                </span>
+              </label>
+              <button
+                className="modal-primary"
+                disabled={!ageChecked}
+                onClick={confirmStart}
+              >
+                Включить камеру и начать <ArrowRight size={18} />
+              </button>
+            </div>
           </div>
-          <p className="modal-copy">
-            Включите камеру, устройтесь поудобнее — новый разговор совсем рядом.
-          </p>
-          <div className="permission-list">
-            <p>
-              <Video size={19} /> Камера — чтобы видеть друг друга
-            </p>
-            <p>
-              <Mic size={19} /> Микрофон — чтобы слышать друг друга
-            </p>
-            <p>
-              <ShieldCheck size={19} /> «Стоп» отключит ваши устройства
-            </p>
-          </div>
-          <label className="consent">
-            <input
-              type="checkbox"
-              checked={ageChecked}
-              onChange={(e) => setAgeChecked(e.target.checked)}
-            />
-            <span>
-              Мне исполнилось 18 лет. Я принимаю правила: общаться уважительно,
-              не показывать откровенный контент и не рассылать спам.
-            </span>
-          </label>
-          <button
-            className="modal-primary"
-            disabled={!ageChecked}
-            onClick={confirmStart}
-          >
-            Включить камеру и начать <ArrowRight size={18} />
-          </button>
         </Modal>
       )}
       {dialog === "settings" && (
