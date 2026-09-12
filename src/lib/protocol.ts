@@ -19,13 +19,6 @@ export function countryName(code: string): string {
   return countries.find((country) => country.code === code)?.name ??
     (isCountryCode(code) ? regionNames.of(code)! : "Не определена");
 }
-export function matchesCountryFilter(filter: string, country: string): boolean {
-  if (filter === "all") return true;
-  if (filter === "OTHER")
-    return isCountryCode(country) && !countries.some((entry) => entry.code === country);
-  return filter === country;
-}
-
 export type Gender = "male" | "female" | "other";
 export type Profile = {
   country: string;

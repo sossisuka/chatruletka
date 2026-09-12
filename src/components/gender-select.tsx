@@ -48,9 +48,11 @@ export function GenderSelect({
   const [open, setOpen] = useState(false);
   const [openAbove, setOpenAbove] = useState(true);
   const [highlighted, setHighlighted] = useState(selected);
+  const [selecting, setSelecting] = useState<Gender | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const selectionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const listId = useId();
   const expanded = open && !disabled;
   const current = genderOptions[selected];
@@ -58,7 +60,12 @@ export function GenderSelect({
   useEffect(() => {
     if (!expanded) return;
     function closeOutside(event: PointerEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      if (!rootRef.current?.contains(event.target as Node)) {
+        if (selectionTimerRef.current) clearTimeout(selectionTimerRef.current);
+        selectionTimerRef.current = null;
+        setSelecting(null);
+        setOpen(false);
+      }
     }
     document.addEventListener("pointerdown", closeOutside);
     return () => document.removeEventListener("pointerdown", closeOutside);
@@ -69,7 +76,17 @@ export function GenderSelect({
       listRef.current?.children[highlighted]?.scrollIntoView({ block: "nearest" });
   }, [expanded, highlighted]);
 
+  useEffect(
+    () => () => {
+      if (selectionTimerRef.current) clearTimeout(selectionTimerRef.current);
+    },
+    [],
+  );
+
   function showMenu() {
+    if (selectionTimerRef.current) clearTimeout(selectionTimerRef.current);
+    selectionTimerRef.current = null;
+    setSelecting(null);
     const bounds = rootRef.current?.getBoundingClientRect();
     const menuHeight = 172;
     setOpenAbove(
@@ -83,9 +100,17 @@ export function GenderSelect({
   }
 
   function choose(index: number) {
-    onChange(genderOptions[index].value);
-    setOpen(false);
-    buttonRef.current?.focus({ preventScroll: true });
+    if (selecting) return;
+    const next = genderOptions[index].value;
+    setHighlighted(index);
+    setSelecting(next);
+    onChange(next);
+    selectionTimerRef.current = setTimeout(() => {
+      selectionTimerRef.current = null;
+      setOpen(false);
+      setSelecting(null);
+      buttonRef.current?.focus({ preventScroll: true });
+    }, 180);
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
@@ -93,8 +118,14 @@ export function GenderSelect({
     if (key === "Escape" && expanded) {
       event.preventDefault();
       event.stopPropagation();
+      if (selectionTimerRef.current) clearTimeout(selectionTimerRef.current);
+      selectionTimerRef.current = null;
+      setSelecting(null);
       setOpen(false);
     } else if (key === "Tab") {
+      if (selectionTimerRef.current) clearTimeout(selectionTimerRef.current);
+      selectionTimerRef.current = null;
+      setSelecting(null);
       setOpen(false);
     } else if (key === "Enter" || key === " ") {
       event.preventDefault();
@@ -142,12 +173,18 @@ export function GenderSelect({
         onKeyDown={onKeyDown}
         onClick={() => {
           setHighlighted(selected);
-          if (expanded) setOpen(false);
+          if (expanded) {
+            if (selectionTimerRef.current) clearTimeout(selectionTimerRef.current);
+            selectionTimerRef.current = null;
+            setSelecting(null);
+            setOpen(false);
+          }
           else showMenu();
         }}
       >
         <span className="gender-value">Ваш пол</span>
         <Image
+          key={current.value}
           className="gender-icon"
           src={current.icon}
           width={26}
@@ -160,9 +197,10 @@ export function GenderSelect({
         <ul
           ref={listRef}
           id={listId}
-          className="gender-options"
+          className={`gender-options${selecting ? " is-selecting" : ""}`}
           role="listbox"
           aria-label="Ваш пол"
+          aria-busy={Boolean(selecting)}
         >
           {genderOptions.map((option, index) => (
             <li
@@ -170,7 +208,10 @@ export function GenderSelect({
               id={`${listId}-${index}`}
               role="option"
               aria-selected={option.value === value}
-              className={index === highlighted ? "is-highlighted" : ""}
+              className={[
+                index === highlighted ? "is-highlighted" : "",
+                selecting === option.value ? "is-selecting" : "",
+              ].filter(Boolean).join(" ")}
               onPointerMove={() => setHighlighted(index)}
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => choose(index)}

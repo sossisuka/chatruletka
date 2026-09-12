@@ -159,31 +159,24 @@ test("Next switches an actual conversation with a third visitor waiting", async 
   await cContext.close();
 });
 
-test("country filter waits for a compatible visitor", async ({
+test("country display is read-only and matching remains worldwide", async ({
   browser,
   page,
 }) => {
   await page.goto("/");
-  await page.getByRole("combobox", { name: "Страна собеседника" }).click();
-  await page.getByRole("option", { name: "Германия", exact: true }).click();
-  await page.getByRole("button", { name: "Старт Начать знакомство" }).click();
-  await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Включить камеру и начать" }).click();
+  const ownCountry = page.getByLabel(/Ваша страна:/);
+  await expect(ownCountry).toBeVisible();
+  await expect(ownCountry).toContainText("Страна");
+  await expect(ownCountry.getByRole("button")).toHaveCount(0);
+  await expect(
+    page.getByRole("combobox", { name: "Страна собеседника" }),
+  ).toHaveCount(0);
+  await start(page);
   const context = await browser.newContext({
     permissions: ["camera", "microphone"],
   });
   const b = await context.newPage();
   await start(b);
-  await expect(
-    page.getByRole("heading", { name: "Ищем собеседника…" }),
-  ).toBeVisible();
-  await expect(
-    b.getByRole("heading", { name: "Ищем собеседника…" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Стоп Завершить чат" }).click();
-  await page.getByRole("combobox", { name: "Страна собеседника" }).click();
-  await page.getByRole("option", { name: "Всего мира", exact: true }).click();
-  await page.getByRole("button", { name: "Старт Начать знакомство" }).click();
   await Promise.all([connected(page), connected(b)]);
   await context.close();
 });
@@ -351,32 +344,18 @@ test("phone landscape keeps roulette controls, chat and consent dialog in the vi
   expect(dialogLayout.scrollHeight).toBeLessThanOrEqual(dialogLayout.clientHeight);
 });
 
-test("country filter supports keyboard selection and own country is read-only", async ({ page }) => {
+test("own country is read-only in controls and settings", async ({ page }) => {
   await page.goto("/");
-  const country = page.getByRole("combobox", { name: "Страна собеседника" });
-  await country.focus();
-  await page.keyboard.press("ArrowDown");
-  await expect(page.getByRole("listbox")).toBeVisible();
-  await page.keyboard.press("Home");
-  for (let step = 0; step < 5; step++) await page.keyboard.press("ArrowDown");
-  await page.keyboard.press("Enter");
-  await expect(country).toContainText("Германия");
-  await expect(country).toBeFocused();
-  const selectedFlag = country.locator(".country-flag:not(.country-globe)");
-  await expect(selectedFlag).toBeVisible();
-  const flagShape = await selectedFlag.evaluate((element) => {
-    const bounds = element.getBoundingClientRect();
-    return {
-      width: bounds.width,
-      height: bounds.height,
-      borderRadius: getComputedStyle(element).borderRadius,
-    };
-  });
-  expect(Math.abs(flagShape.width - flagShape.height)).toBeLessThan(0.1);
-  expect(flagShape.borderRadius).toBe("50%");
-  await country.click();
-  await page.locator(".local-panel").click();
-  await expect(page.getByRole("listbox")).not.toBeVisible();
+  const country = page.locator(".country-display");
+  await expect(country).toBeVisible();
+  await expect(country).toHaveAttribute("aria-label", /Ваша страна:/);
+  await expect(country.locator(".country-flag")).toBeVisible();
+  await expect(country.locator("button, select")).toHaveCount(0);
+  expect(
+    await country.locator(".country-display-visual").evaluate(
+      (element) => getComputedStyle(element).animationName,
+    ),
+  ).toBe("country-reveal");
 
   await page.getByRole("button", { name: "Настройки", exact: true }).click();
   const settingsDialog = page.getByRole("dialog", { name: "Ваши настройки" });
@@ -400,6 +379,9 @@ test("gender selector uses the supplied avatars and works with keyboard", async 
 
   const listbox = page.getByRole("listbox", { name: "Ваш пол" });
   await expect(listbox).toBeVisible();
+  expect(
+    await listbox.evaluate((element) => getComputedStyle(element).animationName),
+  ).toBe("gender-menu-above-in");
   await expect(listbox.getByRole("option")).toHaveText([
     "Мужской",
     "Женский",
@@ -425,15 +407,25 @@ test("gender selector uses the supplied avatars and works with keyboard", async 
   expect(bounds.right).toBeLessThanOrEqual(bounds.viewportWidth);
   expect(bounds.bottom).toBeLessThanOrEqual(bounds.viewportHeight);
 
-  await listbox.getByRole("option", { name: "Мужской" }).click();
+  const male = listbox.getByRole("option", { name: "Мужской" });
+  await male.click();
+  await expect(male).toHaveClass(/is-selecting/);
+  expect(
+    await male.evaluate((element) => getComputedStyle(element).animationName),
+  ).toBe("gender-choice");
   await expect(gender.locator("img")).toHaveAttribute(
     "src",
     "/assets/icons/gender-male-icon.svg",
   );
+  await expect(listbox).not.toBeVisible();
   await expect(gender).toBeFocused();
 
-  await page.keyboard.press("Enter");
+  await gender.click();
+  await expect(listbox).toBeVisible();
   await page.keyboard.press("End");
+  await expect(listbox.getByRole("option", { name: "Пара" })).toHaveClass(
+    /is-highlighted/,
+  );
   await page.keyboard.press("Enter");
   await expect(gender.locator("img")).toHaveAttribute(
     "src",

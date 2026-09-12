@@ -4,9 +4,7 @@ import { Server, type Socket } from "socket.io";
 import { isAllowedOrigin } from "./origin";
 import { getClientIp } from "./client-ip";
 import {
-  countries,
   isCountryCode,
-  matchesCountryFilter,
   type ClientEvents,
   type ServerEvents,
   type Profile,
@@ -32,15 +30,14 @@ type Options = {
   maxConnectionsPerIp?: number;
   trustProxy?: boolean;
   lookupCountry?: (ip: string) => Promise<string | null>;
+  random?: () => number;
 };
-const countryCodes = new Set<string>(countries.map((c) => c.code));
-
 function isProfile(value: unknown): value is Profile {
   if (!value || typeof value !== "object") return false;
   const p = value as Profile;
   return (
     typeof p.country === "string" &&
-    (p.lookingForCountry === "all" || countryCodes.has(p.lookingForCountry)) &&
+    p.lookingForCountry === "all" &&
     ["male", "female", "other"].includes(p.gender)
   );
 }
@@ -70,6 +67,7 @@ export function createRealtime(httpServer: HttpServer, options: Options = {}) {
   const peers = new Map<string, Peer>();
   const queue = new Set<string>();
   const ipCounts = new Map<string, number>();
+  const random = options.random ?? Math.random;
   const io = new Server<ClientEvents, ServerEvents>(httpServer, {
     maxHttpBufferSize: 64_000,
     pingTimeout: 15_000,
@@ -109,39 +107,41 @@ export function createRealtime(httpServer: HttpServer, options: Options = {}) {
       a.previous !== b.socket.id &&
       b.previous !== a.socket.id &&
       !a.blocked.has(b.socket.id) &&
-      !b.blocked.has(a.socket.id) &&
-      matchesCountryFilter(a.profile.lookingForCountry, b.profile.country) &&
-      matchesCountryFilter(b.profile.lookingForCountry, a.profile.country)
+      !b.blocked.has(a.socket.id)
     );
   }
   function drain() {
-    for (const id of queue) {
+    for (const id of [...queue]) {
       const a = peers.get(id);
       if (!a || !a.socket.connected) {
         queue.delete(id);
         continue;
       }
-      for (const candidate of queue) {
-        const b = peers.get(candidate);
-        if (!b || !b.socket.connected || !compatible(a, b)) continue;
-        const sessionId = randomUUID();
-        queue.delete(id);
-        queue.delete(candidate);
-        a.partner = candidate;
-        b.partner = id;
-        a.sessionId = b.sessionId = sessionId;
-        a.socket.emit("matched", {
-          sessionId,
-          initiator: true,
-          peer: { country: b.profile!.country, gender: b.profile!.gender },
-        });
-        b.socket.emit("matched", {
-          sessionId,
-          initiator: false,
-          peer: { country: a.profile!.country, gender: a.profile!.gender },
-        });
-        break;
-      }
+      const candidates = [...queue].filter((candidate) => {
+        const peer = peers.get(candidate);
+        return Boolean(peer?.socket.connected && compatible(a, peer));
+      });
+      if (!candidates.length) continue;
+      const candidate = candidates[
+        Math.min(candidates.length - 1, Math.floor(random() * candidates.length))
+      ];
+      const b = peers.get(candidate)!;
+      const sessionId = randomUUID();
+      queue.delete(id);
+      queue.delete(candidate);
+      a.partner = candidate;
+      b.partner = id;
+      a.sessionId = b.sessionId = sessionId;
+      a.socket.emit("matched", {
+        sessionId,
+        initiator: true,
+        peer: { country: b.profile!.country, gender: b.profile!.gender },
+      });
+      b.socket.emit("matched", {
+        sessionId,
+        initiator: false,
+        peer: { country: a.profile!.country, gender: a.profile!.gender },
+      });
     }
     publishStats();
   }
@@ -236,7 +236,7 @@ export function createRealtime(httpServer: HttpServer, options: Options = {}) {
       p.profile = {
         country: p.country,
         gender: profile.gender,
-        lookingForCountry: profile.lookingForCountry,
+        lookingForCountry: "all",
       };
       queue.add(socket.id);
       socket.emit("waiting");

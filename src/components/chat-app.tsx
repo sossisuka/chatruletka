@@ -33,7 +33,6 @@ import { countryName } from "@/lib/protocol";
 import { VideoPane } from "./video-pane";
 import { Modal } from "./modal";
 import { CountryFlag } from "./country-flag";
-import { CountrySelect } from "./country-select";
 import { GenderSelect } from "./gender-select";
 import { NoiseCanvas } from "./noise-canvas";
 
@@ -61,6 +60,7 @@ export function ChatApp() {
   const paired = chat.status === "connecting" || chat.status === "connected";
   const searching = chat.status === "searching" || chat.status === "connecting";
   const peerCountry = chat.match?.peer.country;
+  const ownCountry = countryName(chat.profile.country);
   const time = `${String(Math.floor(chat.elapsed / 60)).padStart(2, "0")}:${String(chat.elapsed % 60).padStart(2, "0")}`;
   const sessionId = chat.match?.sessionId || "";
   const draft = draftState.sessionId === sessionId ? draftState.text : "";
@@ -455,17 +455,20 @@ export function ChatApp() {
               </button>
             </div>
             <div className="filter-row">
-              <CountrySelect
-                className="filter country-filter"
-                label="Страна собеседника"
-                caption="Собеседники из"
-                includeAll
-                value={chat.profile.lookingForCountry}
-                disabled={active}
-                onChange={(country) =>
-                  chat.updateProfile({ ...chat.profile, lookingForCountry: country })
-                }
-              />
+              <div
+                className="filter country-display"
+                aria-label={`Ваша страна: ${chat.serverConnected ? ownCountry : "Определяем…"}`}
+                title={chat.serverConnected ? ownCountry : "Определяем страну…"}
+              >
+                <span className="country-display-label">Страна</span>
+                <span
+                  key={chat.profile.country}
+                  className="country-display-visual"
+                  aria-hidden="true"
+                >
+                  <CountryFlag code={chat.profile.country} />
+                </span>
+              </div>
               <GenderSelect
                 value={chat.profile.gender}
                 disabled={active}

@@ -43,6 +43,7 @@ beforeEach(async () => {
     turnSecret: "test-only-secret",
     trustProxy: true,
     maxConnectionsPerIp: 3,
+    random: () => 0,
     lookupCountry: createCountryLookup({
       token: "test-only-2ip-token",
       minIntervalMs: 0,
@@ -120,26 +121,24 @@ test("the first visitor waits; a real second visitor creates one isolated pair",
   });
 });
 
-test("country preferences are enforced in both directions", async () => {
+test("matchmaking stays worldwide across detected countries", async () => {
   detectedCountries.set("8.8.8.8", "RU");
   detectedCountries.set("1.1.1.1", "DE");
   const a = await visitor({ Origin: origin, "X-Forwarded-For": "8.8.8.8" });
   const b = await visitor({ Origin: origin, "X-Forwarded-For": "1.1.1.1" });
-  const c = await visitor({ Origin: origin, "X-Forwarded-For": "1.1.1.1" });
-  await a.search({ ...defaultProfile, country: "RU", lookingForCountry: "DE" });
-  await b.search({ ...defaultProfile, country: "DE", lookingForCountry: "US" });
-  assert.equal(realtime.stats().conversations, 0);
-  await c.search({ ...defaultProfile, country: "DE", lookingForCountry: "RU" });
+  await a.search({ ...defaultProfile, country: "US" });
+  await b.search({ ...defaultProfile, country: "TR" });
   await until(
-    () => c.events.matches.length === 1 && a.events.matches.length === 1,
+    () => a.events.matches.length === 1 && b.events.matches.length === 1,
   );
-  assert.equal(a.events.matches[0].sessionId, c.events.matches[0].sessionId);
-  assert.equal(b.events.matches.length, 0);
-  assert.equal(realtime.stats().searching, 1);
+  assert.equal(a.events.matches[0].sessionId, b.events.matches[0].sessionId);
+  assert.equal(realtime.stats().conversations, 1);
   assert.equal(a.events.ready!.country, "RU");
+  assert.equal(b.events.ready!.country, "DE");
   assert.equal(JSON.stringify(a.events.ready).includes("test-only-2ip-token"), false);
   assert.equal(JSON.stringify(a.events.ready).includes("8.8.8.8"), false);
   assert.equal(a.events.matches[0].peer.country, "DE");
+  assert.equal(b.events.matches[0].peer.country, "RU");
 });
 
 test("client country spoofing cannot affect matching or the country shown to peers", async () => {
@@ -147,9 +146,7 @@ test("client country spoofing cannot affect matching or the country shown to pee
   const a = await visitor({ Origin: origin, "X-Forwarded-For": "9.9.9.9, 8.8.8.8" });
   const b = await visitor();
   await a.search({ ...defaultProfile, country: "DE" });
-  await b.search({ ...defaultProfile, lookingForCountry: "DE" });
-  assert.equal(realtime.stats().conversations, 0);
-  await b.search({ ...defaultProfile, lookingForCountry: "OTHER" });
+  await b.search({ ...defaultProfile, country: "RU" });
   await until(() => a.events.matches.length === 1 && b.events.matches.length === 1);
   assert.equal(a.events.ready!.country, "FR");
   assert.equal(b.events.matches[0].peer.country, "FR");
@@ -160,11 +157,7 @@ test("unavailable geolocation never falls back to a self-declared country", asyn
   const a = await visitor({ Origin: origin, "X-Forwarded-For": "8.8.8.8" });
   const b = await visitor();
   await a.search({ ...defaultProfile, country: "RU" });
-  for (const filter of ["RU", "OTHER"]) {
-    await b.search({ ...defaultProfile, lookingForCountry: filter });
-    assert.equal(realtime.stats().conversations, 0);
-  }
-  await b.search();
+  await b.search({ ...defaultProfile, country: "DE" });
   await until(() => b.events.matches.length === 1);
   assert.equal(b.events.matches[0].peer.country, "UNKNOWN");
 });

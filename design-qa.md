@@ -121,4 +121,18 @@
 - The selected/highlighted option uses `#2d8dec`, the popup opens above the lower control when space permits, and all options support pointer and keyboard selection.
 - Automated verification: Playwright 11/11 scenarios passed, including avatar mapping, pointer selection, keyboard selection, menu bounds, and the existing realtime chat flow.
 
+## Worldwide matching and control animation iteration
+
+- Source visual truth: the supplied opened-selector screenshot and the user-supplied original `home.7712b684.css`, `common.cdcbdc83.css`, and `home.888074a8.js` examples.
+- Implementation desktop country state: `artifacts/worldwide-country-desktop.png`, 1262 x 624 px, CSS viewport 1262 x 624, device scale factor 1.
+- Implementation desktop selector state: `artifacts/worldwide-gender-animation-desktop.png`, 1262 x 624 px.
+- Implementation iPhone landscape: `artifacts/worldwide-controls-iphone-landscape.png`, 932 x 430 px.
+- [P1] The country tile incorrectly controlled the desired peer country. It is now a read-only display of the server-detected 2ip country; no country button, select, listbox, or client-side override remains.
+- [P1] Country preferences previously restricted pairing. The realtime server now accepts only the worldwide profile value, ignores client-declared countries, and picks a random compatible waiting candidate when multiple candidates are available.
+- [P2] Selector appearance and choice changed abruptly. The final menu uses a 180 ms anchored scale/fade entrance, 24 ms staggered rows, a 180 ms choice pulse before closing, and an animated icon update.
+- [P2] The detected country icon appeared without feedback. A keyed 280 ms scale/fade reveal now runs when the 2ip result changes the displayed country.
+- Reduced-motion mode disables the new motion through the existing global accessibility rule.
+- Final layout evidence: no horizontal overflow at 1262 x 624 or 932 x 430; the country tile and the complete selector stay inside the workspace.
+- Automated verification: unit/integration 28/28 and Playwright 11/11 passed, including worldwide cross-country matching, spoof resistance, read-only country UI, animation hooks, pointer selection, keyboard selection, and WebRTC flow.
+
 final result: passed
